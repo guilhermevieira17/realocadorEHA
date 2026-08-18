@@ -1,362 +1,3405 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-  <base target="_top">
-  <meta charset="utf-8">
-  <style>
-    :root {
-      --azul: #ee4d2d;
-      --verde: #1c9c5b;
-      --amarelo: #d99a00;
-      --cinza: #6b7280;
-      --bg: #f4f5f7;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopee Express | Rota Mista V.3</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --spx-orange: #ee4d2d;
+    --spx-orange-dark: #c93d20;
+    --spx-sand: #fff7f3;
+    --spx-ink: #1f1f1f;
+    --spx-muted: #6b7280;
+    --spx-line: #f1d7cf;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Barlow', sans-serif;
+    color: var(--spx-ink);
+    background:
+      radial-gradient(circle at top left, rgba(238, 77, 45, 0.16), transparent 32%),
+      radial-gradient(circle at bottom right, rgba(255, 183, 94, 0.22), transparent 28%),
+      linear-gradient(180deg, #fff8f5 0%, #fffdfc 52%, #fff4ef 100%);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .brand-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+    padding: 28px;
+    background: linear-gradient(135deg, #ff6a3d 0%, #ee4d2d 48%, #d63f23 100%);
+    color: #fff;
+    box-shadow: 0 24px 60px rgba(238, 77, 45, 0.28);
+  }
+  .brand-hero::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    top: -30px;
+    width: 220px;
+    height: 220px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .brand-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .panel {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(238, 77, 45, 0.12);
+    border-radius: 24px;
+    box-shadow: 0 18px 40px rgba(25, 28, 33, 0.07);
+    backdrop-filter: blur(8px);
+  }
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1.08rem;
+    color: var(--spx-ink);
+  }
+  .soft-input,
+  .soft-select,
+  .soft-textarea {
+    width: 100%;
+    border: 1px solid #ebd1c9;
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: var(--spx-ink);
+    outline: none;
+    transition: 0.18s ease;
+  }
+  .soft-input:focus,
+  .soft-select:focus,
+  .soft-textarea:focus {
+    border-color: var(--spx-orange);
+    box-shadow: 0 0 0 4px rgba(238, 77, 45, 0.14);
+  }
+  .primary-btn,
+  .secondary-btn,
+  .ghost-btn {
+    border: 0;
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.18s ease;
+  }
+  .primary-btn {
+    color: #fff;
+    background: linear-gradient(135deg, #ff6a3d 0%, #ee4d2d 100%);
+    box-shadow: 0 14px 28px rgba(238, 77, 45, 0.24);
+  }
+  .primary-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 34px rgba(238, 77, 45, 0.28);
+  }
+  .secondary-btn {
+    color: #123a63;
+    background: #edf5ff;
+    border: 1px solid #bfd7ff;
+  }
+  .secondary-btn:hover { background: #e0efff; }
+  .ghost-btn {
+    color: #0f5132;
+    background: #ecfdf3;
+    border: 1px solid #bce7cb;
+  }
+  .ghost-btn:hover { background: #dff8e8; }
+  .scanner-shell {
+    display: none;
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px;
+    background: #121212;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .scanner-shell.active { display: block; }
+  .scanner-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    color: #fff;
+    background: linear-gradient(180deg, rgba(18, 18, 18, 0.08) 0%, rgba(18, 18, 18, 0.88) 100%);
+  }
+  .scan-toast-container {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 9999;
+    display: grid;
+    gap: 10px;
+    width: min(360px, calc(100vw - 28px));
+  }
+  .scan-toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: #111827;
+    color: #fff;
+    box-shadow: 0 18px 40px rgba(17, 24, 39, 0.24);
+    transform: translateX(115%);
+    transition: transform 0.22s ease;
+  }
+  .scan-toast.show { transform: translateX(0); }
+  .scan-toast.success { border-left: 6px solid #16a34a; }
+  .scan-toast.info { border-left: 6px solid #f59e0b; }
+  .scan-toast.error { border-left: 6px solid #dc2626; }
+  .scan-toast .code { font-family: monospace; font-size: 13px; opacity: 0.9; }
+  .route-suggestions {
+    margin-top: 10px;
+    display: grid;
+    gap: 8px;
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+  .route-suggestion-count {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #f0dbd5;
+    font-size: 12px;
+    font-weight: 800;
+    color: #9a3412;
+  }
+  .route-suggestion-item {
+    width: 100%;
+    text-align: left;
+    border: 1px solid #f0dbd5;
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: #fff9f7;
+    transition: 0.18s ease;
+  }
+  .route-suggestion-item:hover {
+    border-color: #f0a390;
+    background: #fff3ee;
+  }
+  .suggestion-select {
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #efc9bf;
+    font-size: 13px;
+    appearance: none;
+    background-color: #fff;
+    cursor: pointer;
+    color: #1a202c;
+    width: 100%;
+  }
+  .suggestion-select:focus {
+    outline: none;
+    border-color: var(--spx-orange);
+    box-shadow: 0 0 0 4px rgba(238, 77, 45, 0.14);
+  }
+  .cloud-panel {
+    background: linear-gradient(180deg, #f6fbff 0%, #ffffff 100%);
+    border: 1px solid #d7e6fb;
+  }
+  .cloud-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: #e0f2fe;
+    color: #075985;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .cloud-status {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f766e;
+  }
+  .etiqueta {
+    width: 7cm;
+    height: 4cm;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    border: 1px dashed #ccc;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    background-color: white;
+    margin-bottom: 10px;
+    color: #000;
+  }
+  .linha { border-top: 2px solid #000; margin: 2px 0; }
+  .etiqueta .rota-nova {
+    font-size: 34px;
+    font-weight: 900;
+    text-align: center;
+    margin: 0;
+    color: #000;
+    line-height: 1.1;
+    flex-shrink: 0;
+  }
+  .etiqueta .detalhes {
+    font-size: 11px;
+    text-align: left;
+    padding: 0 2px;
+    line-height: 1.2;
+    color: #000;
+  }
+  .etiqueta .rota-antiga {
+    font-size: 9px;
+    text-align: center;
+    margin-top: 2px;
+    color: #000;
+    flex-shrink: 0;
+  }
+  #printArea { display: none; }
+  @keyframes progress-indeterminate {
+    0% { left: -100%; width: 100%; }
+    50% { left: 0%; width: 100%; }
+    100% { left: 100%; width: 100%; }
+  }
+  .animate-progress-indeterminate {
+    position: relative;
+    animation: progress-indeterminate 1.5s infinite linear;
+  }
+  .animate-fade-in { animation: fadeIn 0.24s ease-in-out; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @media print {
+    @page { size: 7cm 4cm; margin: 0; }
+    body.printing-labels {
+      display: block !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: none !important;
+      width: auto !important;
+      height: auto !important;
     }
-    * { box-sizing: border-box; }
-    body {
-      font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--bg);
-      margin: 0;
-      padding: 16px;
-      color: #1f2430;
+    body.printing-labels .ui-container,
+    body.printing-labels .scan-toast-container,
+    body.printing-labels #overrideModal,
+    body.printing-labels #manualModal,
+    body.printing-labels #historyModal,
+    body.printing-labels #missingRoutesModal,
+    body.printing-labels #usageGuideModal {
+      display: none !important;
     }
-    h1 { font-size: 18px; margin: 0 0 4px; }
-    .sub { color: var(--cinza); font-size: 13px; margin-bottom: 16px; }
-
-    .card {
-      background: #fff;
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 14px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    body.printing-labels #printArea {
+      display: block !important;
     }
-
-    label { font-size: 12px; color: var(--cinza); display:block; margin-bottom: 4px; }
-    select, input[type=text], textarea {
-      width: 100%;
-      font-size: 16px;
-      padding: 10px;
-      border: 1px solid #d8dbe0;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      font-family: inherit;
-    }
-    textarea { resize: vertical; min-height: 70px; }
-    input#brInput { font-size: 22px; text-align:center; letter-spacing: 1px; }
-
-    button {
-      font-size: 16px;
-      padding: 12px 16px;
-      border: none;
-      border-radius: 8px;
-      background: var(--azul);
-      color: #fff;
-      cursor: pointer;
-      width: 100%;
-    }
-    button:disabled { opacity: .5; cursor: not-allowed; }
-    button.secundario { background: #fff; color: var(--azul); border: 1px solid var(--azul); }
-
-    .status-linha { display:flex; align-items:center; gap:8px; font-size: 13px; margin-bottom: 10px; }
-    .bolinha { width:8px; height:8px; border-radius:50%; background: var(--cinza); flex-shrink: 0; }
-    .bolinha.ok { background: var(--verde); }
-    .bolinha.erro { background: #d64545; }
-    .status-linha .trocar { margin-left: auto; color: var(--azul); font-size: 12px; text-decoration: none; white-space: nowrap; }
-    #cookieForm button { margin-bottom: 0; }
-
-    .sugestao {
-      border: 1px solid #e3e5e9;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 8px;
-      cursor: pointer;
-    }
-    .sugestao.top { border-color: var(--verde); background: #f2fbf6; }
-    .sugestao .linha1 { display:flex; justify-content:space-between; font-weight:600; }
-    .sugestao .linha2 { font-size: 12px; color: var(--cinza); margin-top: 2px; }
-    .tag {
-      display:inline-block; font-size: 11px; font-weight:600; padding: 2px 6px;
-      border-radius: 6px; background:#eef1f5; color:#444; margin-right: 4px;
-    }
-    .tag.mesa { background:#fff3e0; color:#a05a00; }
-    .tag.criterio-GEO { background:#e6f6ec; color:#177a45; }
-    .tag.criterio-BAIRRO { background:#e8f0fe; color:#1a56b3; }
-    .tag.criterio-CEP { background:#fdf1e0; color:#a15c00; }
-    .tag.criterio-CLUSTER { background:#f1eafe; color:#6a2fb3; }
-
-    .resultado { text-align:center; }
-    .resultado .ok-icone { font-size: 40px; }
-    .resultado h2 { margin: 8px 0 2px; }
-    .mensagem-erro { background:#fdeceb; color:#a3271b; border-radius:8px; padding:10px; font-size: 13px; margin-bottom: 10px; }
-    .mensagem-info { background:#eef1f5; color:#333; border-radius:8px; padding:10px; font-size: 13px; margin-bottom: 10px; }
-
-    /* Mesmo formato 7cm x 4cm já usado em produção no Rota Mista V.3
-       (createLabelHtml / .etiqueta) — mantém consistência visual com
-       o que os operadores já reconhecem, colado por cima da etiqueta antiga. */
     .etiqueta {
-      width: 7cm;
-      height: 4cm;
-      padding: 5px 10px;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-      border: 1px dashed #ccc;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow: hidden;
-      background-color: white;
-      margin-top: 10px;
-      color: #000;
+      border: none !important;
+      width: 7cm !important;
+      height: 4cm !important;
+      margin: 0 !important;
+      page-break-after: always !important;
+      break-after: page !important;
+      break-inside: avoid !important;
     }
-    .etiqueta .linha { border-top: 2px solid #000; margin: 2px 0; }
-    .etiqueta .rota-nova {
-      font-size: 34px;
-      font-weight: 900;
-      text-align: center;
-      margin: 0;
-      color: #000;
-      line-height: 1.1;
-      flex-shrink: 0;
-    }
-    .etiqueta .detalhes { font-size: 11px; text-align: left; padding: 0 2px; line-height: 1.2; color: #000; }
-    .etiqueta .rota-antiga { font-size: 9px; text-align: center; margin-top: 2px; color: #000; flex-shrink: 0; }
-    #printArea { display: none; }
-    .oculto { display:none; }
-
-    @media print {
-      @page { size: 7cm 4cm; margin: 0; }
-      body.printing-labels {
-        display: block !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: none !important;
-      }
-      body.printing-labels > *:not(#printArea) { display: none !important; }
-      body.printing-labels #printArea { display: block !important; }
-      .etiqueta { border: none !important; margin: 0 !important; }
-    }
-  </style>
+  }
+  @media (max-width: 720px) {
+    body { padding: 12px; }
+    .brand-hero, .panel { border-radius: 20px; }
+    .brand-hero { padding: 22px 18px; }
+    .scanner-footer { align-items: flex-start; }
+    .scan-toast-container { top: 12px; right: 12px; }
+  }
+</style>
 </head>
 <body>
-
-  <h1>📦 Realocador EHA</h1>
-  <div class="sub">Bipe o BR do pacote que não coube na rota original.</div>
-
-  <div class="card">
-    <label for="hubSelect">Hub</label>
-    <select id="hubSelect"></select>
-    <div class="status-linha">
-      <div id="cookieBolinha" class="bolinha"></div>
-      <span id="cookieTexto">verificando cookie do hub…</span>
-      <a href="#" class="trocar" id="trocarCookieLink" onclick="mostrarCookieForm(); return false;">trocar cookie</a>
+<div id="scanToastContainer" class="scan-toast-container"></div>
+<div class="shell ui-container">
+  <section class="brand-hero mb-5">
+    <div class="relative z-10">
+      <div class="brand-chip mb-4">
+        <i class="fa-solid fa-truck-fast"></i>
+        Shopee Express
+      </div>
+      <div class="md:flex md:items-end md:justify-between gap-4">
+        <div>
+          <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">Rota Mista V.3 ,MEGA HUB LPR - 16</h1>
+          <p class="text-white/90 text-sm md:text-base max-w-2xl">Leitura em lote, sugestões automáticas e nuvem compartilhada entre celular e computador.</p>
+        </div>
+        <div class="mt-4 md:mt-0 rounded-2xl bg-white/12 border border-white/20 px-4 py-3">
+          <div class="text-xs uppercase tracking-[0.22em] text-white/75 font-bold">Operação</div>
+          <div class="text-lg font-extrabold">Realocador de Pacotes</div>
+          <button id="openUsageGuideButton" type="button" class="mt-3 w-full rounded-xl bg-white text-[#c93d20] px-4 py-3 text-sm font-extrabold hover:bg-[#fff7f3] transition">
+            <i class="fa-solid fa-book-medical mr-2"></i>Como utilizar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="panel p-5 md:p-7 mb-5">
+    <div class="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-5">
+      <div class="space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-2xl border border-[#f5d4cb] bg-[#fff8f5]">
+            <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-[0.14em]">
+              <i class="fa-solid fa-truck-fast mr-2 text-[#ee4d2d]"></i>Veículo Preferencial
+            </label>
+            <select id="preferredVehicle" class="soft-select">
+              <option value="" selected>Sem preferência</option>
+              <option value="VAN">VAN</option>
+              <option value="FIORINO">FIORINO</option>
+              <option value="PASSEIO">PASSEIO</option>
+            </select>
+          </div>
+          <div class="p-4 rounded-2xl border border-[#d8e8ff] bg-[#f6fbff]">
+            <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-[0.14em]">
+              <i class="fa-solid fa-sitemap mr-2 text-[#2b6cb0]"></i>Prioridade de Busca
+            </label>
+            <select id="searchPreference" class="soft-select">
+              <option value="ALL" selected>Todas as sugestões</option>
+              <option value="GEO">Geolocalização</option>
+              <option value="CEP">Apenas CEP</option>
+              <option value="ZIP_OR_NEIGHBORHOOD">CEP / Bairro</option>
+              <option value="CLUSTER">Cluster</option>
+            </select>
+          </div>
+        </div>
+        <div class="rounded-2xl border border-[#d8e8ff] bg-[#f6fbff] p-4">
+          <div class="section-title mb-2">
+            <i class="fa-solid fa-link text-[#0284c7]"></i>
+            Importar Romaneio
+          </div>
+          <p class="text-sm text-gray-600 mb-3">
+            Cole o link do romaneio para puxar as colunas necessárias da aba Calculation Tasks (CTs) para a planilha base.
+          </p>
+          <input id="romaneioLinkInput" type="url" class="soft-input" placeholder="Cole aqui o link da planilha do romaneio">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+            <button id="importRomaneioButton" class="primary-btn">
+              <i class="fa-solid fa-file-import mr-2"></i>Importar Calculation Tasks
+            </button>
+            <button id="updateModalsButton" class="secondary-btn">
+              <i class="fa-solid fa-car-side mr-2"></i>Atualizar Modais/Motoristas
+            </button>
+          </div>
+          <p id="romaneioImportStatus" class="hidden text-xs font-bold mt-3"></p>
+        </div>
+        <div class="rounded-2xl border border-[#f1ddd6] bg-white p-4">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
+            <div>
+              <div class="section-title">
+                <i class="fa-solid fa-qrcode text-[#ee4d2d]"></i>
+                Leitor QR Contínuo
+              </div>
+              <p class="text-sm text-gray-500 mt-1">
+                No celular, deixe a câmera aberta e vá bipando quantos pacotes quiser. Cada leitura também pode subir para a nuvem compartilhada.
+              </p>
+            </div>
+            <div class="flex gap-2">
+              <button id="startScannerButton" class="primary-btn">
+                <i class="fa-solid fa-camera mr-2"></i>Ler QRCode
+              </button>
+              <button id="stopScannerButton" class="secondary-btn hidden">
+                <i class="fa-solid fa-xmark mr-2"></i>Fechar
+              </button>
+            </div>
+          </div>
+          <div id="scannerShell" class="scanner-shell">
+            <div class="scanner-footer">
+              <div>
+                <div id="qrScannerStatus" class="font-bold text-sm">Scanner pronto para abrir em janela separada.</div>
+                <div class="text-xs text-white/70">Ao tocar em "Ler QRCode", uma janela de scanner será aberta com solicitação de câmera.</div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs uppercase tracking-[0.18em] text-white/65">Capturados</div>
+                <div id="qrCapturedCount" class="text-2xl font-extrabold">0</div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 flex flex-col md:flex-row gap-3">
+            <button id="captureQrButton" class="secondary-btn">
+              <i class="fa-solid fa-image mr-2"></i>Capturar QR por Foto
+            </button>
+            <input id="captureQrInput" type="file" accept="image/*" capture="environment" class="hidden">
+          </div>
+        </div>
+        <div class="rounded-2xl border border-[#f1ddd6] bg-white p-4">
+          <div class="section-title mb-3">
+            <i class="fa-solid fa-layer-group text-[#ee4d2d]"></i>
+            Busca em Lote
+          </div>
+          <textarea id="packageCodeList" placeholder="Cole ou leia os códigos. Um por linha..." rows="6" class="soft-textarea resize-none"></textarea>
+          <div class="mt-4 flex flex-col md:flex-row gap-3">
+            <button id="batchButton" class="primary-btn flex-1">
+              <i class="fa-solid fa-layer-group mr-2"></i>Processar Lote
+            </button>
+            <button id="clearBatchButton" class="secondary-btn md:w-auto">
+              <i class="fa-solid fa-eraser mr-2"></i>Limpar Lista
+            </button>
+          </div>
+          <button id="reprintHistoryButton" onclick="openHistoryModal()" class="ghost-btn w-full mt-3">
+            <i class="fa-solid fa-clock-rotate-left mr-2"></i>Reimprimir do Histórico
+          </button>
+          <div id="batchProgressBar" class="hidden mt-4 w-full bg-[#f2e8e4] rounded-full h-3 overflow-hidden">
+            <div class="bg-[#ee4d2d] h-3 rounded-full animate-progress-indeterminate w-full"></div>
+          </div>
+          <p id="batchLoadingText" class="hidden text-center text-xs text-gray-500 mt-2 animate-pulse">Consultando base e montando sugestões...</p>
+          <p id="batchStats" class="text-center text-xs text-gray-500 mt-3 font-mono hidden"></p>
+        </div>
+        <div class="rounded-2xl p-4 cloud-panel">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
+            <div>
+              <div class="section-title">
+                <i class="fa-solid fa-cloud text-[#0284c7]"></i>
+                Nuvem Compartilhada
+              </div>
+              <p class="text-sm text-gray-600 mt-1">
+                Use no celular para mandar os códigos para a nuvem e, no computador, puxar, copiar ou jogar direto para a lista do lote.
+              </p>
+            </div>
+            <div class="cloud-badge">
+              <i class="fa-solid fa-mobile-screen-button"></i>
+              Celular -> Nuvem -> PC
+            </div>
+          </div>
+          <textarea id="cloudCodeBuffer" class="soft-textarea resize-none bg-[#f8fbff]" rows="5" placeholder="Os códigos compartilhados aparecerão aqui..." readonly></textarea>
+          <div id="cloudStatus" class="cloud-status mt-3">Carregando nuvem...</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+            <button id="sendBatchToCloudButton" class="secondary-btn">
+              <i class="fa-solid fa-cloud-arrow-up mr-2"></i>Enviar Lista para Nuvem
+            </button>
+            <button id="refreshCloudButton" class="secondary-btn">
+              <i class="fa-solid fa-rotate mr-2"></i>Atualizar Nuvem
+            </button>
+            <button id="copyCloudButton" class="ghost-btn">
+              <i class="fa-solid fa-copy mr-2"></i>Copiar Códigos da Nuvem
+            </button>
+            <button id="importCloudButton" class="primary-btn">
+              <i class="fa-solid fa-cloud-arrow-down mr-2"></i>Trazer para o Lote
+            </button>
+          </div>
+          <button id="clearCloudButton" class="w-full mt-3 text-red-600 bg-red-50 border border-red-200 rounded-2xl py-3 font-bold hover:bg-red-100 transition">
+            <i class="fa-solid fa-trash-can mr-2"></i>Limpar Nuvem
+          </button>
+        </div>
+      </div>
+      <div class="rounded-2xl border border-[#f1ddd6] bg-[#fffaf8] p-4 md:p-5">
+        <div class="section-title mb-2">
+          <i class="fa-solid fa-circle-info text-[#ee4d2d]"></i>
+          Fluxo de Uso
+        </div>
+        <div class="space-y-3 text-sm text-gray-600">
+          <div class="rounded-2xl border border-white bg-white p-4">
+            <div class="font-bold text-gray-800 mb-1">1. Bipar no celular</div>
+            <div>Use o leitor QR no celular. Os códigos entram na lista local e podem subir para a nuvem compartilhada.</div>
+          </div>
+          <div class="rounded-2xl border border-white bg-white p-4">
+            <div class="font-bold text-gray-800 mb-1">2. Abrir no computador</div>
+            <div>Clique em "Atualizar Nuvem" ou "Trazer para o Lote" para buscar os códigos que vieram do celular.</div>
+          </div>
+          <div class="rounded-2xl border border-white bg-white p-4">
+            <div class="font-bold text-gray-800 mb-1">3. Importar romaneio</div>
+            <div>Cole o link do romaneio para atualizar a aba Calculation Tasks (CTs) com as colunas operacionais.</div>
+          </div>
+          <div class="rounded-2xl border border-white bg-white p-4">
+            <div class="font-bold text-gray-800 mb-1">4. Processar lote</div>
+            <div>O sistema mantém a lógica atual e espalha melhor os pacotes entre as rotas sugeridas.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="resultsContainer" class="hidden mt-6">
+      <div class="mt-4 text-center">
+        <button onclick="openManualModal()" class="text-gray-600 hover:text-[#ee4d2d] text-sm font-semibold underline decoration-dashed">
+          <i class="fa-solid fa-hand-pointer mr-1"></i>O pacote não está na lista? Lançamento extra/manual
+        </button>
+      </div>
+      <div id="loadingIndicator" class="text-center text-gray-500 my-5 hidden">
+        <i class="fa-solid fa-spinner fa-spin mr-2"></i>Processando...
+      </div>
+      <div id="suggestionsWrapper" class="mt-5 bg-white rounded-2xl border border-[#f0ddd6] shadow-sm overflow-hidden">
+        <div class="bg-[#fff6f2] p-4 border-b border-[#f0ddd6]">
+          <h2 id="resultsHeader" class="section-title">
+            <i class="fa-solid fa-list-check text-[#ee4d2d]"></i>
+            Resultados
+          </h2>
+        </div>
+        <div id="batchActions" class="hidden p-4 bg-white border-b border-[#f0ddd6] flex flex-col gap-2">
+          <button onclick="printLabelsBatch()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-sm flex justify-center items-center">
+            <i class="fa-solid fa-print mr-2"></i>Imprimir Etiquetas Selecionadas
+          </button>
+          <button onclick="saveReportOnly()" class="w-full bg-[#1d4ed8] text-white py-3 rounded-xl font-bold hover:bg-[#1e40af] transition shadow-sm flex justify-center items-center">
+            <i class="fa-solid fa-cloud-arrow-up mr-2"></i>Salvar na Planilha AT
+          </button>
+        </div>
+        <ul id="suggestionsList" class="divide-y divide-[#f0ddd6]"></ul>
+      </div>
+    </div>
+    <div id="messageContainer" class="hidden p-4 rounded-2xl text-center font-semibold mt-6 text-sm"></div>
+  </section>
+</div>
+<div id="usageGuideModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-[80] backdrop-blur-sm px-4">
+  <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-4xl border-t-[10px] border-[#ee4d2d] animate-fade-in max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-start gap-4 mb-5">
+      <div>
+        <h3 class="text-2xl font-black text-gray-900">
+          <i class="fa-solid fa-book-medical mr-2 text-[#ee4d2d]"></i>Como utilizar o Rota Mista V.3
+        </h3>
+        <p class="text-sm text-gray-500 mt-1">
+          Bula operacional para preparar a planilha, importar bases e usar o aplicativo corretamente.
+        </p>
+      </div>
+      <button id="closeUsageGuideButton" type="button" class="text-gray-400 hover:text-red-500 text-3xl leading-none">&times;</button>
     </div>
 
-    <div id="cookieForm" class="oculto">
-      <label for="cookieInput">Cole todos os cookies do navegador logado no FMS Portal deste hub</label>
-      <textarea id="cookieInput" placeholder="csrftoken=...; fms_user_skey=...; SPC_T_ID=...; ..."></textarea>
-      <button id="salvarCookieBtn" onclick="salvarCookie()">Salvar cookie</button>
-    </div>
+    <div class="space-y-4 text-sm text-gray-700">
+      <div class="rounded-2xl border border-green-200 bg-green-50 p-4">
+        <div class="font-black text-green-800 mb-1">
+          <i class="fa-solid fa-circle-check mr-2"></i>Antes de começar
+        </div>
+        <p>
+          Antes de utilizar o aplicativo, garanta que a planilha principal esteja preparada com as abas corretas e que as bases estejam atualizadas.
+          As planilhas serão disponibilizadas completas aos analistas, mas o uso correto depende da ordem abaixo.
+        </p>
+      </div>
 
-    <label for="brInput">BR do pacote (SPX TN)</label>
-    <input type="text" id="brInput" placeholder="BR..." autofocus autocomplete="off">
-    <button id="buscarBtn" onclick="buscarSugestoes()">Buscar rota</button>
+      <div class="rounded-2xl border border-[#f1ddd6] bg-[#fff8f5] p-4">
+        <h4 class="font-black text-[#c93d20] text-lg mb-2">1. Aba Calculation Tasks (CTs)</h4>
+        <ol class="list-decimal ml-5 space-y-1">
+          <li>Abra o romaneio disponibilizado pela roteirização.</li>
+          <li>Copie o link da planilha do romaneio.</li>
+          <li>Volte ao aplicativo Rota Mista.</li>
+          <li>No campo <strong>Importar Romaneio</strong>, cole o link copiado.</li>
+          <li>Clique em <strong>Importar Calculation Tasks</strong>.</li>
+          <li>Aguarde o aplicativo informar que a importação está concluída.</li>
+        </ol>
+        <p class="mt-3 text-xs font-bold text-[#9a3412]">
+          Essa aba é a base principal do aplicativo. Ela alimenta as buscas por pacote, rota, cluster, CEP, bairro e geolocalização.
+        </p>
+      </div>
+
+      <div class="rounded-2xl border border-[#d8e8ff] bg-[#f6fbff] p-4">
+        <h4 class="font-black text-[#1d4ed8] text-lg mb-2">2. Aba EXPORTAR AT'S</h4>
+        <ol class="list-decimal ml-5 space-y-1">
+          <li>Copie todas as ATs do romaneio.</li>
+          <li>Vá até o SPX.</li>
+          <li>Acesse <strong>Entrega</strong>.</li>
+          <li>Entre em <strong>Atribuição de entrega</strong>.</li>
+          <li>Abra <strong>Batch Search</strong>.</li>
+          <li>Cole todas as ATs copiadas.</li>
+          <li>Selecione <strong>All Pages</strong>.</li>
+          <li>Clique em <strong>Exportar AT</strong>.</li>
+          <li>Volte para a planilha principal.</li>
+          <li>Importe o arquivo exportado na aba <strong>EXPORTAR AT'S</strong>.</li>
+        </ol>
+        <div class="mt-3 rounded-xl border border-yellow-300 bg-yellow-50 p-3 text-yellow-800 font-bold text-xs">
+          <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+          Certifique-se de copiar todas as ATs na hora de exportar no SPX. Se faltar AT, o aplicativo pode não preencher modal, motorista ou sugestão corretamente.
+        </div>
+      </div>
+
+      <div class="rounded-2xl border border-purple-200 bg-purple-50 p-4">
+        <h4 class="font-black text-purple-800 text-lg mb-2">3. Aba POOL - apenas onda PM</h4>
+        <ol class="list-decimal ml-5 space-y-1">
+          <li>Use a aba POOL apenas para a onda PM.</li>
+          <li>No SPX, vá em <strong>Roteirizar</strong>.</li>
+          <li>Acesse <strong>Pedidos para roteirizar</strong>.</li>
+          <li>Clique em <strong>Exportar</strong>.</li>
+          <li>Baixe o arquivo.</li>
+          <li>Importe esse arquivo na aba <strong>POOL</strong>.</li>
+        </ol>
+        <p class="mt-3 text-xs font-bold text-purple-800">
+          A POOL ajuda a localizar pacotes que ainda não aparecem no CT principal.
+        </p>
+      </div>
+
+      <div class="rounded-2xl border border-[#f1ddd6] bg-white p-4">
+        <h4 class="font-black text-gray-900 text-lg mb-2">4. Atualizar modais e motoristas</h4>
+        <ol class="list-decimal ml-5 space-y-1">
+          <li>Depois de preencher a aba <strong>EXPORTAR AT'S</strong>, volte ao aplicativo.</li>
+          <li>Clique em <strong>Atualizar Modais/Motoristas</strong>.</li>
+          <li>Aguarde a confirmação do aplicativo.</li>
+        </ol>
+        <p class="mt-3 text-xs text-gray-600">
+          Essa etapa cruza as ATs do romaneio com a aba EXPORTAR AT'S e preenche modal e motorista na base.
+        </p>
+      </div>
+
+      <div class="rounded-2xl border border-[#f1ddd6] bg-white p-4">
+        <h4 class="font-black text-gray-900 text-lg mb-2">5. Processar pacotes</h4>
+        <ol class="list-decimal ml-5 space-y-1">
+          <li>Cole ou leia os códigos no campo <strong>Busca em Lote</strong>.</li>
+          <li>Escolha o <strong>Veículo Preferencial</strong>, se necessário.</li>
+          <li>Escolha a <strong>Prioridade de Busca</strong>.</li>
+          <li>Clique em <strong>Processar Lote</strong>.</li>
+          <li>Confira as sugestões retornadas.</li>
+          <li>Altere o destino manualmente se alguma sugestão precisar de ajuste.</li>
+          <li>Selecione os pacotes desejados.</li>
+          <li>Clique em <strong>Salvar na Planilha AT</strong> ou <strong>Imprimir Etiquetas Selecionadas</strong>.</li>
+        </ol>
+      </div>
+
+      <div class="rounded-2xl border border-[#d7e6fb] bg-[#f6fbff] p-4">
+        <h4 class="font-black text-[#075985] text-lg mb-2">6. Nuvem compartilhada</h4>
+        <ol class="list-decimal ml-5 space-y-1">
+          <li>No celular, use o leitor QR para bipar os pacotes.</li>
+          <li>Os códigos entram na lista e podem subir para a nuvem.</li>
+          <li>No computador, clique em <strong>Atualizar Nuvem</strong>.</li>
+          <li>Clique em <strong>Trazer para o Lote</strong>.</li>
+          <li>Depois de finalizar, clique em <strong>Limpar Nuvem</strong>.</li>
+        </ol>
+      </div>
+
+      <div class="rounded-2xl border border-[#bce7cb] bg-[#ecfdf3] p-4">
+        <h4 class="font-black text-green-800 text-lg mb-2">7. Executar realocação no SPX</h4>
+        <ol class="list-decimal ml-5 space-y-1">
+          <li>Depois de salvar os pacotes na aba AT, volte para a planilha.</li>
+          <li>No menu superior, clique em <strong>Ações SPX</strong>.</li>
+          <li>Se for o primeiro uso, clique em <strong>Configurar Cookies</strong>.</li>
+          <li>Cole todos os cookies do navegador.</li>
+          <li>Depois clique em <strong>Realocar Pacotes (Executar API)</strong>.</li>
+          <li>Aguarde o processamento finalizar.</li>
+        </ol>
+        <p class="mt-3 text-xs font-bold text-green-800">
+          Os pacotes com sucesso são movidos automaticamente para a aba HISTÓRICOS.
+        </p>
+      </div>
+
+      <div class="rounded-2xl border border-red-200 bg-red-50 p-4">
+        <h4 class="font-black text-red-700 text-lg mb-2">Erros mais comuns</h4>
+        <ul class="list-disc ml-5 space-y-1">
+          <li><strong>Pacote não encontrado:</strong> confira se o CT foi importado e, na onda PM, se a POOL foi preenchida.</li>
+          <li><strong>Sem modal ou motorista:</strong> confira a aba EXPORTAR AT'S e clique em Atualizar Modais/Motoristas.</li>
+          <li><strong>Poucas sugestões:</strong> tente Todas as sugestões e confira CEP, bairro, cluster e GPS no romaneio.</li>
+          <li><strong>Erro de cookie:</strong> configure os cookies novamente no menu Ações SPX.</li>
+          <li><strong>Falha na API:</strong> leia o status na aba AT para identificar o motivo.</li>
+        </ul>
+      </div>
+    </div>
   </div>
+</div>
+<div id="printArea"></div>
+<div id="manualModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm px-4">
+  <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg border-t-[10px] border-[#ee4d2d] animate-fade-in">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-clipboard-check mr-2 text-[#ee4d2d]"></i>Pacote Extra / Manual</h3>
+      <button onclick="closeManualModal()" class="text-gray-400 hover:text-red-500 text-2xl">&times;</button>
+    </div>
+    <p class="text-sm text-gray-500 mb-4">Use para pacotes fora da lista normal. A busca abaixo lista todas as rotas disponíveis.</p>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Código do Pacote</label>
+        <input type="text" id="manualPackageCode" class="soft-input uppercase" placeholder="SPX... / BR...">
+      </div>
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Selecione a Rota de Destino</label>
+        <input type="text" id="manualRouteInput" class="soft-input" placeholder="Digite a rota, AT, cluster ou bairro...">
+        <div id="manualRouteMeta" class="text-xs text-gray-500 mt-2 hidden"></div>
+        <div id="manualRouteSuggestions" class="route-suggestions hidden"></div>
+      </div>
+      <div class="pt-2">
+        <button onclick="processManualPackage()" class="primary-btn w-full">
+          <i class="fa-solid fa-print mr-2"></i>Imprimir e Salvar Extra
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="overrideModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-[60] backdrop-blur-sm px-4">
+  <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md border-t-[10px] border-[#1d4ed8] animate-fade-in">
+    <h3 class="text-lg font-bold text-gray-800 mb-1"><i class="fa-solid fa-shuffle mr-2 text-[#1d4ed8]"></i>Alterar Rota Manualmente</h3>
+    <p id="overrideModalSubtitle" class="text-xs text-gray-500 mb-4">Definindo rota para o pacote...</p>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Buscar Nova Rota</label>
+        <input type="text" id="overrideRouteInput" class="soft-input" placeholder="Digite rota, AT, cluster ou bairro...">
+        <div id="overrideRouteMeta" class="text-xs text-gray-500 mt-2 hidden"></div>
+        <div id="overrideRouteSuggestions" class="route-suggestions hidden"></div>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeOverrideModal()" class="secondary-btn flex-1">Cancelar</button>
+        <button onclick="confirmOverride()" class="primary-btn flex-1">
+          <i class="fa-solid fa-check mr-2"></i>Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="historyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-[70] backdrop-blur-sm px-4">
+  <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg border-t-[10px] border-[#059669] animate-fade-in">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-print mr-2 text-[#059669]"></i>Reimprimir Histórico</h3>
+      <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-red-500 text-2xl">&times;</button>
+    </div>
+    <p class="text-sm text-gray-500 mb-4">Insira os códigos que já foram realocados e estão na aba HISTÓRICOS.</p>
+    <textarea id="historyCodesInput" placeholder="Um código por linha..." rows="8" class="soft-textarea resize-none"></textarea>
+    <div class="pt-4 flex gap-2">
+      <button onclick="processHistoryRebrand()" class="ghost-btn flex-1 !bg-[#059669] !text-white !border-[#059669] hover:!bg-[#047857]">
+        <i class="fa-solid fa-gears mr-2"></i>Gerar Etiquetas
+      </button>
+    </div>
+  </div>
+</div>
+<div id="missingRoutesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-[75] backdrop-blur-sm px-4">
+  <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-2xl border-t-[10px] border-[#f59e0b] animate-fade-in">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-triangle-exclamation mr-2 text-[#f59e0b]"></i>Pacotes sem rota automática</h3>
+      <button onclick="closeMissingRoutesModal()" class="text-gray-400 hover:text-red-500 text-2xl">&times;</button>
+    </div>
+    <p id="missingRoutesSummary" class="text-sm text-gray-500 mb-4">Alguns pacotes precisam de revisão manual.</p>
+    <div id="missingRoutesList" class="max-h-[420px] overflow-y-auto grid gap-2 pr-1"></div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
+      <button onclick="copyMissingRoutes()" class="secondary-btn">
+        <i class="fa-solid fa-copy mr-2"></i>Copiar Códigos
+      </button>
+      <button onclick="closeMissingRoutesModal()" class="primary-btn">
+        <i class="fa-solid fa-check mr-2"></i>Entendi
+      </button>
+    </div>
+  </div>
+</div>
+<script>
+const batchButton = document.getElementById('batchButton');
+const clearBatchButton = document.getElementById('clearBatchButton');
+const batchProgressBar = document.getElementById('batchProgressBar');
+const batchLoadingText = document.getElementById('batchLoadingText');
+const batchStats = document.getElementById('batchStats');
+const packageCodeList = document.getElementById('packageCodeList');
+const preferredVehicleSelect = document.getElementById('preferredVehicle');
+const searchPreferenceSelect = document.getElementById('searchPreference');
+const resultsContainer = document.getElementById('resultsContainer');
+const suggestionsList = document.getElementById('suggestionsList');
+const messageContainer = document.getElementById('messageContainer');
+const loadingIndicator = document.getElementById('loadingIndicator');
+const batchActions = document.getElementById('batchActions');
+const resultsHeader = document.getElementById('resultsHeader');
+const scanToastContainer = document.getElementById('scanToastContainer');
+const startScannerButton = document.getElementById('startScannerButton');
+const stopScannerButton = document.getElementById('stopScannerButton');
+const captureQrButton = document.getElementById('captureQrButton');
+const captureQrInput = document.getElementById('captureQrInput');
+const scannerShell = document.getElementById('scannerShell');
+const qrScannerStatus = document.getElementById('qrScannerStatus');
+const qrCapturedCount = document.getElementById('qrCapturedCount');
+const cloudCodeBuffer = document.getElementById('cloudCodeBuffer');
+const cloudStatus = document.getElementById('cloudStatus');
+const sendBatchToCloudButton = document.getElementById('sendBatchToCloudButton');
+const refreshCloudButton = document.getElementById('refreshCloudButton');
+const copyCloudButton = document.getElementById('copyCloudButton');
+const importCloudButton = document.getElementById('importCloudButton');
+const clearCloudButton = document.getElementById('clearCloudButton');
+const romaneioLinkInput = document.getElementById('romaneioLinkInput');
+const importRomaneioButton = document.getElementById('importRomaneioButton');
+const updateModalsButton = document.getElementById('updateModalsButton');
+const romaneioImportStatus = document.getElementById('romaneioImportStatus');
+const manualRouteInput = document.getElementById('manualRouteInput');
+const manualRouteSuggestions = document.getElementById('manualRouteSuggestions');
+const manualRouteMeta = document.getElementById('manualRouteMeta');
+const overrideRouteInput = document.getElementById('overrideRouteInput');
+const overrideRouteSuggestions = document.getElementById('overrideRouteSuggestions');
+const overrideRouteMeta = document.getElementById('overrideRouteMeta');
+const missingRoutesModal = document.getElementById('missingRoutesModal');
+const missingRoutesList = document.getElementById('missingRoutesList');
+const missingRoutesSummary = document.getElementById('missingRoutesSummary');
+const openUsageGuideButton = document.getElementById('openUsageGuideButton');
+const closeUsageGuideButton = document.getElementById('closeUsageGuideButton');
+const usageGuideModal = document.getElementById('usageGuideModal');
+let resultadosLote = [];
+let missingRouteItems = [];
+let batchStartTime = 0;
+let allRoutesCache = [];
+let currentBatchOverrideIndex = null;
+let scannerActive = false;
+let scannerPopup = null;
+let cloudRefreshTimer = null;
+batchButton.addEventListener('click', searchBatch);
+clearBatchButton.addEventListener('click', clearBatchCodes);
+startScannerButton.addEventListener('click', startQrScanner);
+stopScannerButton.addEventListener('click', stopQrScanner);
+captureQrButton.addEventListener('click', () => captureQrInput.click());
+captureQrInput.addEventListener('change', handleCapturedQrImage);
+sendBatchToCloudButton.addEventListener('click', sendCurrentListToCloud);
+refreshCloudButton.addEventListener('click', () => refreshCloudCodes(true));
+copyCloudButton.addEventListener('click', copyCloudCodes);
+importCloudButton.addEventListener('click', importCloudToBatch);
+clearCloudButton.addEventListener('click', clearCloudStorage);
+importRomaneioButton.addEventListener('click', importRomaneioFromLink);
+updateModalsButton.addEventListener('click', updateVehicleModals);
+openUsageGuideButton.addEventListener('click', openUsageGuideModal);
+closeUsageGuideButton.addEventListener('click', closeUsageGuideModal);
+usageGuideModal.addEventListener('click', event => {
+  if (event.target === usageGuideModal) closeUsageGuideModal();
+});
+window.addEventListener('message', handleScannerPopupMessage);
+window.addEventListener('load', () => {
+  loadAllRoutes();
+  setupRouteAutocomplete();
+  updateQrCapturedCount();
+  refreshCloudCodes(false);
+  cloudRefreshTimer = setInterval(() => refreshCloudCodes(false), 15000);
+});
+document.addEventListener('click', (event) => {
+  if (!manualRouteSuggestions.contains(event.target) && event.target !== manualRouteInput) {
+    manualRouteSuggestions.classList.add('hidden');
+  }
+  if (!overrideRouteSuggestions.contains(event.target) && event.target !== overrideRouteInput) {
+    overrideRouteSuggestions.classList.add('hidden');
+  }
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && scannerPopup && !scannerPopup.closed) {
+    qrScannerStatus.textContent = 'Scanner continua aberto na janela separada.';
+  }
+});
+function openUsageGuideModal() {
+  usageGuideModal.classList.remove('hidden');
+}
+function closeUsageGuideModal() {
+  usageGuideModal.classList.add('hidden');
+}
+function displayMessage(text, type = 'info') {
+  messageContainer.innerHTML = text;
+  messageContainer.className = 'p-4 rounded-2xl text-center font-semibold mt-6 text-sm';
+  messageContainer.classList.remove('hidden');
+  if (type === 'error') {
+    messageContainer.classList.add('bg-red-50', 'text-red-700', 'border', 'border-red-200');
+  } else if (type === 'success') {
+    messageContainer.classList.add('bg-green-50', 'text-green-700', 'border', 'border-green-200');
+  } else {
+    messageContainer.classList.add('bg-orange-50', 'text-orange-700', 'border', 'border-orange-200');
+  }
+}
+function showScanToast(code, type = 'success', title) {
+  const toast = document.createElement('div');
+  const safeCode = escapeHtml(code || '');
+  const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-xmark' : 'fa-circle-info';
+  const label = title || (type === 'success' ? 'Bipado e salvo na lista' : 'Código já estava na lista');
+  toast.className = `scan-toast ${type}`;
+  toast.innerHTML = `
+    <i class="fa-solid ${icon} text-lg"></i>
+    <div>
+      <div class="font-extrabold text-sm">${label}</div>
+      <div class="code">${safeCode}</div>
+    </div>
+  `;
+  scanToastContainer.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 20);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 250);
+  }, 2400);
+}
+function clearResults() {
+  resultsContainer.classList.add('hidden');
+  suggestionsList.innerHTML = '';
+  messageContainer.classList.add('hidden');
+  loadingIndicator.classList.add('hidden');
+  batchActions.classList.add('hidden');
+  batchStats.classList.add('hidden');
+  resultsHeader.innerHTML = '<i class="fa-solid fa-list-check text-[#ee4d2d]"></i> Resultados';
+  resultadosLote = [];
+  missingRouteItems = [];
+  closeMissingRoutesModal();
+}
+function toggleBatchLoading(isLoading) {
+  if (isLoading) {
+    batchProgressBar.classList.remove('hidden');
+    batchLoadingText.classList.remove('hidden');
+    batchButton.disabled = true;
+    batchButton.classList.add('opacity-60', 'cursor-not-allowed');
+    batchButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Processando...';
+    batchStats.classList.add('hidden');
+    return;
+  }
+  batchProgressBar.classList.add('hidden');
+  batchLoadingText.classList.add('hidden');
+  batchButton.disabled = false;
+  batchButton.classList.remove('opacity-60', 'cursor-not-allowed');
+  batchButton.innerHTML = '<i class="fa-solid fa-layer-group mr-2"></i>Processar Lote';
+}
+function setRomaneioImportLoading(isLoading) {
+  importRomaneioButton.disabled = isLoading;
+  importRomaneioButton.classList.toggle('opacity-60', isLoading);
+  importRomaneioButton.classList.toggle('cursor-not-allowed', isLoading);
+  importRomaneioButton.innerHTML = isLoading
+    ? '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Importando...'
+    : '<i class="fa-solid fa-file-import mr-2"></i>Importar Calculation Tasks';
+}
+function setModalsUpdateLoading(isLoading) {
+  updateModalsButton.disabled = isLoading;
+  updateModalsButton.classList.toggle('opacity-60', isLoading);
+  updateModalsButton.classList.toggle('cursor-not-allowed', isLoading);
+  updateModalsButton.innerHTML = isLoading
+    ? '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Atualizando...'
+    : '<i class="fa-solid fa-car-side mr-2"></i>Atualizar Modais/Motoristas';
+}
+function setRomaneioStatus(text, type = 'info') {
+  romaneioImportStatus.textContent = text;
+  romaneioImportStatus.className = 'text-xs font-bold mt-3';
+  romaneioImportStatus.classList.remove('hidden');
+  if (type === 'error') romaneioImportStatus.classList.add('text-red-600');
+  else if (type === 'success') romaneioImportStatus.classList.add('text-green-700');
+  else romaneioImportStatus.classList.add('text-blue-700');
+}
+function importRomaneioFromLink() {
+  const romaneioUrl = romaneioLinkInput.value.trim();
+  if (!romaneioUrl) {
+    setRomaneioStatus('Cole o link do romaneio antes de importar.', 'error');
+    return;
+  }
+  if (!confirm("Antes de importar o romaneio, confirme: a aba EXPORTAR AT'S ja foi atualizada para puxar modais e motoristas?")) {
+    setRomaneioStatus("Importacao cancelada. Atualize a aba EXPORTAR AT'S e tente novamente.", 'info');
+    return;
+  }
+  setRomaneioImportLoading(true);
+  setRomaneioStatus('Importando dados do romaneio e preenchendo modais...', 'info');
+  google.script.run
+    .withSuccessHandler(response => {
+      setRomaneioImportLoading(false);
+      const modalText = response.modalsUpdated !== undefined ? ` - ${response.modalsUpdated} modal(is)` : '';
+      const driverText = response.driversUpdated !== undefined ? ` e ${response.driversUpdated} motorista(s) preenchido(s)` : '';
+      const timeText = response.processingSeconds ? ` Tempo: ${response.processingSeconds}s.` : '';
+      const message = `Importação concluída: ${response.rows} linha(s), ${response.columns} coluna(s)${modalText}${driverText}.${timeText}`;
+      setRomaneioStatus(message, 'success');
+      displayMessage(message, 'success');
+      loadAllRoutes();
+    })
+    .withFailureHandler(error => {
+      setRomaneioImportLoading(false);
+      const message = 'Erro ao importar romaneio: ' + error.message;
+      setRomaneioStatus(message, 'error');
+      displayMessage(message, 'error');
+    })
+    .importCalculationTasksFromUrl(romaneioUrl);
+}
+function updateVehicleModals() {
+  if (!confirm("Confirma que a aba EXPORTAR AT'S ja esta atualizada para puxar os modais e motoristas?")) return;
 
-  <div id="areaSugestoes" class="oculto"></div>
-  <div id="areaResultado" class="oculto"></div>
-
-  <div id="printArea"></div>
-
-  <script>
-    var HUBS_CACHE = [];
-    var estadoAtual = null; // { br, station, candidatos, original }
-
-    document.getElementById('brInput').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') buscarSugestoes();
+  setModalsUpdateLoading(true);
+  setRomaneioStatus("Atualizando modais e motoristas pela aba EXPORTAR AT'S...", 'info');
+  google.script.run
+    .withSuccessHandler(response => {
+      setModalsUpdateLoading(false);
+      const message = response && response.message ? response.message : 'Modais atualizados.';
+      setRomaneioStatus(message, 'success');
+      displayMessage(message, 'success');
+      loadAllRoutes();
+    })
+    .withFailureHandler(error => {
+      setModalsUpdateLoading(false);
+      const message = 'Erro ao atualizar modais/motoristas: ' + error.message;
+      setRomaneioStatus(message, 'error');
+      displayMessage(message, 'error');
+    })
+    .updateCalculationTaskVehicleModals();
+}
+function setCloudStatus(text, isError = false) {
+  cloudStatus.textContent = text;
+  cloudStatus.className = `cloud-status mt-3 ${isError ? 'text-red-600' : 'text-teal-700'}`;
+}
+function clearBatchCodes() {
+  packageCodeList.value = '';
+  updateQrCapturedCount();
+  displayMessage('Lista limpa.', 'info');
+}
+function normalizeClientText(text) {
+  if (!text) return '';
+  return text.toString()
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+function getCurrentBatchCodes() {
+  return packageCodeList.value
+    .split('\n')
+    .map(code => code.trim().toUpperCase())
+    .filter(Boolean);
+}
+function updateQrCapturedCount() {
+  qrCapturedCount.textContent = getCurrentBatchCodes().length.toString();
+}
+function sanitizeScannedCode(rawValue) {
+  if (!rawValue) return '';
+  const rawText = rawValue.toString().trim();
+  const match = rawText.match(/(BR[A-Z0-9]+|SPX[A-Z0-9]+)/i);
+  return match ? match[1].toUpperCase() : rawText.toUpperCase();
+}
+function getCloudSourceLabel() {
+  const mobileMatch = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+  return mobileMatch ? 'CELULAR' : 'COMPUTADOR';
+}
+function appendCodesToBatchInput(codes) {
+  const existingCodes = getCurrentBatchCodes();
+  const existingSet = new Set(existingCodes);
+  const addedCodes = [];
+  codes.forEach(code => {
+    const clean = sanitizeScannedCode(code);
+    if (!clean || existingSet.has(clean)) return;
+    existingSet.add(clean);
+    existingCodes.push(clean);
+    addedCodes.push(clean);
+  });
+  if (addedCodes.length > 0) {
+    packageCodeList.value = existingCodes.join('\n');
+    updateQrCapturedCount();
+  }
+  return {
+    addedCount: addedCodes.length,
+    addedCodes: addedCodes
+  };
+}
+function pushCodesToCloud(codes, showMessage = false) {
+  const cleanCodes = Array.from(new Set((codes || []).map(code => sanitizeScannedCode(code)).filter(Boolean)));
+  if (!cleanCodes.length) {
+    if (showMessage) displayMessage('Nenhum código válido para enviar para a nuvem.', 'info');
+    return;
+  }
+  setCloudStatus('Enviando para a nuvem...');
+  google.script.run
+    .withSuccessHandler(response => {
+      const total = response && response.count ? response.count : 0;
+      setCloudStatus(`${total} código(s) disponíveis na nuvem.`);
+      refreshCloudCodes(false);
+      if (showMessage) {
+        displayMessage(`${response.added} código(s) enviados para a nuvem.${response.ignored ? ' Repetidos foram ignorados.' : ''}`, 'success');
+      }
+    })
+    .withFailureHandler(error => {
+      setCloudStatus('Erro ao enviar para a nuvem.', true);
+      if (showMessage) displayMessage('Erro ao enviar para a nuvem: ' + error.message, 'error');
+    })
+    .saveCodesToCloud(cleanCodes, getCloudSourceLabel());
+}
+function refreshCloudCodes(showMessage = false) {
+  setCloudStatus('Atualizando nuvem...');
+  google.script.run
+    .withSuccessHandler(response => {
+      const text = response && response.text ? response.text : '';
+      cloudCodeBuffer.value = text;
+      if (response && response.count) {
+        const updatedPart = response.lastUpdated ? ` Ultima atualização: ${response.lastUpdated}.` : '';
+        setCloudStatus(`${response.count} código(s) disponíveis na nuvem.${updatedPart}`);
+      } else {
+        setCloudStatus('Nuvem vazia.');
+      }
+      if (showMessage) {
+        displayMessage(response && response.count ? `${response.count} código(s) carregados da nuvem.` : 'A nuvem está vazia.', response && response.count ? 'success' : 'info');
+      }
+    })
+    .withFailureHandler(error => {
+      setCloudStatus('Erro ao carregar a nuvem.', true);
+      if (showMessage) displayMessage('Erro ao carregar a nuvem: ' + error.message, 'error');
+    })
+    .getCloudCodes();
+}
+function sendCurrentListToCloud() {
+  const codes = getCurrentBatchCodes();
+  if (!codes.length) {
+    displayMessage('Não há códigos na lista atual para enviar.', 'info');
+    return;
+  }
+  pushCodesToCloud(codes, true);
+}
+function copyCloudCodes() {
+  const text = cloudCodeBuffer.value.trim();
+  if (!text) {
+    displayMessage('A nuvem está vazia.', 'info');
+    return;
+  }
+  if (!navigator.clipboard || !navigator.clipboard.writeText) {
+    displayMessage('Seu navegador não liberou a cópia automática. Você ainda pode selecionar e copiar manualmente.', 'info');
+    cloudCodeBuffer.focus();
+    cloudCodeBuffer.select();
+    return;
+  }
+  navigator.clipboard.writeText(text)
+    .then(() => displayMessage('Códigos da nuvem copiados.', 'success'))
+    .catch(() => {
+      cloudCodeBuffer.focus();
+      cloudCodeBuffer.select();
+      displayMessage('Não consegui copiar automaticamente. Deixei o texto selecionado para copiar manualmente.', 'info');
     });
-
-    google.script.run.withSuccessHandler(function(hubs) {
-      HUBS_CACHE = hubs;
-      var sel = document.getElementById('hubSelect');
-      sel.innerHTML = hubs.map(function(h) {
-        return '<option value="' + h.id + '"' + (h.id === 10047 ? ' selected' : '') + '>' + h.nome + ' (' + h.id + ')</option>';
-      }).join('');
-      atualizarStatusCookie();
-    }).getHubsList();
-
-    document.getElementById('hubSelect').addEventListener('change', atualizarStatusCookie);
-
-    function stationAtual() {
-      return parseInt(document.getElementById('hubSelect').value, 10);
-    }
-
-    function atualizarStatusCookie() {
-      var bolinha = document.getElementById('cookieBolinha');
-      var texto = document.getElementById('cookieTexto');
-      bolinha.className = 'bolinha';
-      texto.textContent = 'verificando cookie do hub…';
-      google.script.run.withSuccessHandler(function(r) {
-        bolinha.className = 'bolinha ' + (r.ok ? 'ok' : 'erro');
-        texto.textContent = r.ok ? ('cookie OK — ' + r.hub) : ('sem cookie configurado para ' + r.hub);
-        if (r.ok) { esconderCookieForm(); } else { mostrarCookieForm(); }
-      }).statusCookieHub(stationAtual());
-    }
-
-    function mostrarCookieForm() {
-      document.getElementById('cookieForm').classList.remove('oculto');
-    }
-
-    function esconderCookieForm() {
-      document.getElementById('cookieForm').classList.add('oculto');
-      document.getElementById('cookieInput').value = '';
-    }
-
-    function salvarCookie() {
-      var texto = document.getElementById('cookieInput').value.trim();
-      if (!texto) return;
-      var btn = document.getElementById('salvarCookieBtn');
-      btn.disabled = true;
-      btn.textContent = 'Salvando...';
-      google.script.run
-        .withSuccessHandler(function(r) {
-          btn.disabled = false;
-          btn.textContent = 'Salvar cookie';
-          if (r.ok) {
-            atualizarStatusCookie();
-          } else {
-            alert('Faltando: ' + ((r.faltando && r.faltando.join(', ')) || r.error || 'cookie incompleto'));
-          }
-        })
-        .withFailureHandler(function(err) {
-          btn.disabled = false;
-          btn.textContent = 'Salvar cookie';
-          alert('Erro ao salvar cookie: ' + (err.message || err));
-        })
-        .salvarCookieHub(stationAtual(), texto);
-    }
-
-    function limparAreas() {
-      document.getElementById('areaSugestoes').classList.add('oculto');
-      document.getElementById('areaSugestoes').innerHTML = '';
-      document.getElementById('areaResultado').classList.add('oculto');
-      document.getElementById('areaResultado').innerHTML = '';
-    }
-
-    function buscarSugestoes() {
-      var br = document.getElementById('brInput').value.trim();
-      if (!br) return;
-      limparAreas();
-      var btn = document.getElementById('buscarBtn');
-      btn.disabled = true;
-      btn.textContent = 'Buscando...';
-
-      google.script.run
-        .withSuccessHandler(function(res) { btn.disabled = false; btn.textContent = 'Buscar rota'; mostrarSugestoes(br, res); })
-        .withFailureHandler(function(err) { btn.disabled = false; btn.textContent = 'Buscar rota'; mostrarErro(err.message || String(err)); })
-        .getSugestoesEha(br, stationAtual());
-    }
-
-    function mostrarErro(msg) {
-      var area = document.getElementById('areaResultado');
-      area.classList.remove('oculto');
-      area.innerHTML = '<div class="card"><div class="mensagem-erro">❌ ' + msg + '</div></div>';
-    }
-
-    function mostrarSugestoes(br, res) {
-      if (!res.ok) { mostrarErro(res.error); return; }
-
-      estadoAtual = { br: br, station: stationAtual(), candidatos: res.candidatos, original: res.original };
-      var area = document.getElementById('areaSugestoes');
-      area.classList.remove('oculto');
-
-      if (!res.candidatos.length) {
-        area.innerHTML = '<div class="card"><div class="mensagem-info">⚠️ Sem rota disponível pra esse pacote agora (origem: '
-          + res.original.at + ' / ' + res.original.cage + '). Fica retido — já registrei essa pendência.</div></div>';
-        return;
+}
+function importCloudToBatch() {
+  const text = cloudCodeBuffer.value.trim();
+  if (!text) {
+    displayMessage('A nuvem está vazia.', 'info');
+    return;
+  }
+  const importResult = appendCodesToBatchInput(text.split('\n'));
+  if (!importResult.addedCount) {
+    displayMessage('Todos os códigos da nuvem já estão na lista do lote.', 'info');
+    return;
+  }
+  displayMessage(`${importResult.addedCount} código(s) trazidos da nuvem para a lista do lote.`, 'success');
+}
+function clearCloudStorage() {
+  if (!confirm('Deseja limpar todos os códigos que estão na nuvem compartilhada?')) return;
+  setCloudStatus('Limpando nuvem...');
+  google.script.run
+    .withSuccessHandler(response => {
+      cloudCodeBuffer.value = '';
+      setCloudStatus('Nuvem vazia.');
+      displayMessage(`Nuvem limpa com sucesso. ${response.removed} código(s) removidos.`, 'success');
+    })
+    .withFailureHandler(error => {
+      setCloudStatus('Erro ao limpar a nuvem.', true);
+      displayMessage('Erro ao limpar a nuvem: ' + error.message, 'error');
+    })
+    .clearCloudCodes();
+}
+async function startQrScanner() {
+  if (scannerActive) return;
+  scannerShell.classList.add('active');
+  qrScannerStatus.textContent = 'Abrindo janela do scanner e solicitando câmera...';
+  try {
+    openQrScannerPopup();
+    scannerActive = true;
+    startScannerButton.classList.add('hidden');
+    stopScannerButton.classList.remove('hidden');
+  } catch (error) {
+    console.error(error);
+    scannerActive = false;
+    qrScannerStatus.textContent = 'Não foi possível abrir o scanner.';
+    displayMessage('Não consegui abrir a janela do scanner. Se o navegador bloquear pop-up, use "Capturar QR por Foto".', 'error');
+  }
+}
+function stopQrScanner() {
+  scannerActive = false;
+  if (scannerPopup && !scannerPopup.closed) scannerPopup.close();
+  scannerPopup = null;
+  scannerShell.classList.remove('active');
+  startScannerButton.classList.remove('hidden');
+  stopScannerButton.classList.add('hidden');
+  qrScannerStatus.textContent = 'Leitor fechado.';
+}
+function handleCapturedQrImage(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const image = new Image();
+  const fileReader = new FileReader();
+  fileReader.onload = function(loadEvent) {
+    image.onload = function() {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      canvas.width = image.width;
+      canvas.height = image.height;
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const qrResult = window.jsQR
+        ? window.jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'attemptBoth' })
+        : null;
+      if (qrResult && qrResult.data) {
+        const cleanCode = sanitizeScannedCode(qrResult.data);
+        const result = appendCodesToBatchInput([qrResult.data]);
+        if (result.addedCount > 0) {
+          pushCodesToCloud(result.addedCodes, false);
+          displayMessage(`QR lido por foto: ${cleanCode}`, 'success');
+          showScanToast(cleanCode, 'success', 'Foto lida e salva na lista');
+          qrScannerStatus.textContent = `Lido por foto: ${cleanCode}`;
+        } else {
+          showScanToast(cleanCode, 'info', 'Código repetido');
+          displayMessage('Este código já estava na lista.', 'info');
+        }
+      } else {
+        displayMessage('Não consegui identificar um QR Code na imagem enviada.', 'error');
       }
-
-      var html = '<div class="card"><div class="sub">Origem: ' + res.original.at + ' (' + res.original.cage + ') — ' + res.original.cluster + '</div>';
-      res.candidatos.forEach(function(c, i) {
-        html += '<div class="sugestao' + (i === 0 ? ' top' : '') + '" onclick="confirmarAlocacao(' + i + ')">'
-          + '<div class="linha1"><span>' + c.at + ' — ' + c.cage + '</span><span>' + (i === 0 ? '⭐ melhor opção' : '') + '</span></div>'
-          + '<div class="linha2">'
-          + '<span class="tag criterio-' + c.criterio + '">' + c.criterio + '</span>'
-          + (c.mesa ? '<span class="tag mesa">MESA ' + c.mesa + '</span>' : '')
-          + (c.statusDoca ? '<span class="tag">' + c.statusDoca + '</span>' : '')
-          + c.cluster + ' · motorista: ' + (c.driver || '—')
-          + '</div></div>';
+      captureQrInput.value = '';
+    };
+    image.src = loadEvent.target.result;
+  };
+  fileReader.readAsDataURL(file);
+}
+function openQrScannerPopup() {
+  if (scannerPopup && !scannerPopup.closed) {
+    scannerPopup.focus();
+    return;
+  }
+  scannerPopup = window.open('', 'spxQrScanner', 'width=430,height=820,resizable=yes,scrollbars=no');
+  if (!scannerPopup) throw new Error('Popup bloqueado');
+  scannerPopup.document.open();
+  scannerPopup.document.write(buildScannerPopupHtml());
+  scannerPopup.document.close();
+  scannerPopup.focus();
+}
+function acknowledgeScannerPopup(code, added) {
+  if (!scannerPopup || scannerPopup.closed) return;
+  scannerPopup.postMessage({
+    type: 'spx-scan-ack',
+    code: code,
+    added: added
+  }, '*');
+}
+function handleScannerPopupMessage(event) {
+  const data = event.data || {};
+  if (!data || typeof data !== 'object' || !data.type) return;
+  if (data.type === 'spx-qr-code') {
+    const cleanCode = sanitizeScannedCode(data.code);
+    const result = appendCodesToBatchInput([data.code]);
+    qrScannerStatus.textContent = result.addedCount > 0 ? `Lido e salvo: ${cleanCode}` : `Repetido ignorado: ${cleanCode}`;
+    showScanToast(cleanCode, result.addedCount > 0 ? 'success' : 'info', result.addedCount > 0 ? 'Bipado e salvo na lista' : 'Código repetido');
+    acknowledgeScannerPopup(cleanCode, result.addedCount > 0);
+    if (result.addedCount > 0) {
+      pushCodesToCloud(result.addedCodes, false);
+      if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+    }
+    return;
+  }
+  if (data.type === 'spx-scanner-status') {
+    qrScannerStatus.textContent = data.message || 'Scanner em execução.';
+    return;
+  }
+  if (data.type === 'spx-scanner-error') {
+    qrScannerStatus.textContent = data.message || 'Falha no scanner.';
+    displayMessage(data.message || 'Falha ao iniciar o scanner.', 'error');
+    return;
+  }
+  if (data.type === 'spx-scanner-closed') stopQrScanner();
+}
+function buildScannerPopupHtml() {
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scanner QRCode SPX</title>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"><\/script>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(180deg, #0f0f10 0%, #1c1c1f 100%);
+    color: #fff;
+  }
+  .wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .top {
+    padding: 18px 16px 10px;
+    background: linear-gradient(135deg, #ff6a3d 0%, #ee4d2d 100%);
+  }
+  .title {
+    font-size: 22px;
+    font-weight: 800;
+  }
+  .sub {
+    margin-top: 4px;
+    font-size: 13px;
+    opacity: 0.92;
+  }
+  .video-wrap {
+    position: relative;
+    flex: 1;
+    background: #000;
+  }
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #000;
+  }
+  canvas {
+    display: none;
+  }
+  .overlay {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .frame {
+    width: min(72vw, 280px);
+    height: min(72vw, 280px);
+    border: 3px solid rgba(255,255,255,0.94);
+    border-radius: 24px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.18);
+  }
+  .scan-ack {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: 16px;
+    z-index: 4;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(22, 163, 74, 0.96);
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 18px 44px rgba(0,0,0,0.34);
+    transform: translateY(-120%);
+    transition: transform 0.2s ease;
+  }
+  .scan-ack.show {
+    transform: translateY(0);
+  }
+  .scan-ack.duplicate {
+    background: rgba(245, 158, 11, 0.96);
+  }
+  .scan-ack .code {
+    display: block;
+    margin-top: 3px;
+    font-family: monospace;
+    font-size: 13px;
+    opacity: 0.95;
+  }
+  .bottom {
+    padding: 14px 16px 22px;
+    background: #151518;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .status {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .hint {
+    font-size: 12px;
+    color: rgba(255,255,255,0.76);
+    margin-bottom: 12px;
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+  }
+  button {
+    flex: 1;
+    border: 0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .primary {
+    background: #ee4d2d;
+    color: #fff;
+  }
+  .secondary {
+    background: #2b2c31;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+<\/style>
+<\/head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="title">Scanner QRCode</div>
+      <div class="sub">A câmera será solicitada nesta janela para leitura contínua.</div>
+    </div>
+    <div class="video-wrap">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="canvas"></canvas>
+      <div id="scanAck" class="scan-ack">Salvo na lista<span class="code"></span></div>
+      <div class="overlay"><div class="frame"></div></div>
+    </div>
+    <div class="bottom">
+      <div id="status" class="status">Iniciando câmera...</div>
+      <div class="hint">Deixe esta janela aberta e vá bipando os pacotes. Cada confirmação toca um bip curto.</div>
+      <div class="actions">
+        <button id="switchCameraBtn" class="secondary">Trocar Câmera</button>
+        <button id="closeBtn" class="primary">Fechar</button>
+      </div>
+    </div>
+  </div>
+<script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const statusEl = document.getElementById('status');
+  const closeBtn = document.getElementById('closeBtn');
+  const switchCameraBtn = document.getElementById('switchCameraBtn');
+  const scanAck = document.getElementById('scanAck');
+  let stream = null;
+  let animationId = null;
+  let detector = null;
+  let lastCode = '';
+  let lastCodeTime = 0;
+  let usingBackCamera = true;
+  let ackTimer = null;
+  let audioContext = null;
+  function post(type, payload) {
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage(Object.assign({ type: type }, payload || {}), '*');
+    }
+  }
+  function getAudioContext() {
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtor) return null;
+    if (!audioContext) audioContext = new AudioCtor();
+    return audioContext;
+  }
+  function prepareBeep() {
+    const ctx = getAudioContext();
+    if (ctx && ctx.state === 'suspended') ctx.resume().catch(function() {});
+  }
+  function playBeep(added) {
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      const start = ctx.currentTime;
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(added ? 1080 : 620, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.18, start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.13);
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      if (ctx.state === 'suspended') ctx.resume().catch(function() {});
+      oscillator.start(start);
+      oscillator.stop(start + 0.14);
+    } catch (error) {}
+  }
+  function showAck(code, added) {
+    clearTimeout(ackTimer);
+    scanAck.classList.toggle('duplicate', !added);
+    scanAck.innerHTML = (added ? 'Bipado e salvo na lista' : 'Código já estava na lista') + '<span class="code">' + code + '</span>';
+    scanAck.classList.add('show');
+    playBeep(added);
+    ackTimer = setTimeout(function() {
+      scanAck.classList.remove('show');
+    }, 1300);
+  }
+  async function createDetector() {
+    if ('BarcodeDetector' in window) {
+      try {
+        const supported = await BarcodeDetector.getSupportedFormats();
+        if (supported.includes('qr_code')) {
+          detector = new BarcodeDetector({ formats: ['qr_code'] });
+          return;
+        }
+      } catch (error) {}
+    }
+    detector = null;
+  }
+  async function startCamera() {
+    prepareBeep();
+    await createDetector();
+    await stopCamera();
+    statusEl.textContent = 'Solicitando permissão da câmera...';
+    post('spx-scanner-status', { message: 'Solicitando permissão da câmera na janela do scanner...' });
+    try {
+      const constraints = usingBackCamera
+        ? { video: { facingMode: { ideal: 'environment' } }, audio: false }
+        : { video: true, audio: false };
+      stream = await navigator.mediaDevices.getUserMedia(constraints);
+      video.srcObject = stream;
+      await video.play();
+      statusEl.textContent = 'Scanner ativo. Pode continuar bipando.';
+      post('spx-scanner-status', { message: 'Scanner ativo em janela separada.' });
+      scanLoop();
+    } catch (error) {
+      const errorName = error && error.name ? error.name : 'Erro';
+      statusEl.textContent = 'Falha ao abrir câmera.';
+      post('spx-scanner-error', {
+        message: 'Não foi possível abrir a câmera nesta janela (' + errorName + '). Tente permitir a câmera no navegador ou use a captura por foto.'
       });
-      html += '</div>';
-      area.innerHTML = html;
     }
-
-    function confirmarAlocacao(indice) {
-      if (!estadoAtual) return;
-      var candidato = estadoAtual.candidatos[indice];
-      document.getElementById('areaSugestoes').innerHTML += '<div class="card"><button disabled>Alocando em ' + candidato.at + '...</button></div>';
-
-      google.script.run
-        .withSuccessHandler(mostrarResultadoAlocacao)
-        .withFailureHandler(function(err) { mostrarErro(err.message || String(err)); })
-        .alocarEha(estadoAtual.br, candidato.at, estadoAtual.station, '');
+  }
+  async function stopCamera() {
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
     }
-
-    function mostrarResultadoAlocacao(res) {
-      document.getElementById('areaSugestoes').classList.add('oculto');
-      var area = document.getElementById('areaResultado');
-      area.classList.remove('oculto');
-
-      if (!res.ok) {
-        area.innerHTML = '<div class="card"><div class="mensagem-erro">❌ ' + res.error + '</div>'
-          + '<button class="secundario" onclick="buscarSugestoes()">Tentar de novo</button></div>';
+    if (stream) {
+      stream.getTracks().forEach(function(track) { track.stop(); });
+      stream = null;
+    }
+    video.srcObject = null;
+  }
+  async function scanLoop() {
+    if (!stream) return;
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      let decodedText = '';
+      if (detector) {
+        try {
+          const barcodes = await detector.detect(canvas);
+          if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+            decodedText = barcodes[0].rawValue;
+          }
+        } catch (error) {}
+      }
+      if (!decodedText && window.jsQR) {
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const qr = window.jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+        if (qr && qr.data) decodedText = qr.data;
+      }
+      if (decodedText) {
+        const now = Date.now();
+        if (decodedText !== lastCode || (now - lastCodeTime) > 1400) {
+          lastCode = decodedText;
+          lastCodeTime = now;
+          statusEl.textContent = 'Lido: ' + decodedText;
+          post('spx-qr-code', { code: decodedText });
+          if (navigator.vibrate) navigator.vibrate(70);
+        }
+      }
+    }
+    animationId = requestAnimationFrame(scanLoop);
+  }
+  window.addEventListener('message', function(event) {
+    const data = event.data || {};
+    if (data.type === 'spx-scan-ack') {
+      showAck(data.code || '', !!data.added);
+    }
+  });
+  document.addEventListener('click', prepareBeep, { once: true });
+  document.addEventListener('touchstart', prepareBeep, { once: true });
+  switchCameraBtn.addEventListener('click', async function() {
+    prepareBeep();
+    usingBackCamera = !usingBackCamera;
+    statusEl.textContent = 'Alternando câmera...';
+    await startCamera();
+  });
+  closeBtn.addEventListener('click', function() {
+    window.close();
+  });
+  window.addEventListener('beforeunload', function() {
+    stopCamera();
+    post('spx-scanner-closed');
+  });
+  startCamera();
+<\/script>
+<\/body>
+<\/html>`;
+}
+function searchBatch() {
+  clearResults();
+  const rawCodes = packageCodeList.value.trim().replace(/[\n,]+/g, '\n');
+  const packageCodes = Array.from(new Set(rawCodes.split('\n').map(code => code.trim()).filter(Boolean)));
+  const preferredVehicle = preferredVehicleSelect.value.trim();
+  const searchPreference = searchPreferenceSelect.value.trim();
+  if (packageCodes.length === 0) {
+    displayMessage('Nenhum código de pacote válido encontrado na lista.', 'error');
+    return;
+  }
+  batchStartTime = Date.now();
+  toggleBatchLoading(true);
+  google.script.run
+    .withSuccessHandler(handleSuccessBatchV2)
+    .withFailureHandler(handleFailure)
+    .getBatchRouteSuggestions(packageCodes, preferredVehicle, searchPreference);
+}
+function getCriterionTag(criterion) {
+  const crit = criterion ? criterion.toUpperCase() : 'CLUSTER';
+  let tag = '';
+  let classes = '';
+  if (crit === 'CEP') {
+    tag = 'Sugestão CEP';
+    classes = 'bg-blue-100 text-blue-700';
+  } else if (crit === 'GEO') {
+    tag = 'Sugestão GEO';
+    classes = 'bg-purple-100 text-purple-700';
+  } else if (crit === 'ZIP_OR_NEIGHBORHOOD') {
+    tag = 'Sugestão CEP / Bairro';
+    classes = 'bg-green-100 text-green-700';
+  } else if (crit === 'MANUAL') {
+    tag = 'Manual';
+    classes = 'bg-slate-100 text-slate-700';
+  } else {
+    tag = 'Sugestão Cluster';
+    classes = 'bg-yellow-100 text-yellow-700';
+  }
+  return `<span class="text-xs font-bold px-2 py-1 rounded-full ${classes}">${tag}</span>`;
+}
+function handleSuccessBatchV2(results) {
+  toggleBatchLoading(false);
+  const duration = ((Date.now() - batchStartTime) / 1000).toFixed(2);
+  const resultItems = Array.isArray(results) ? results : (results && Array.isArray(results.items) ? results.items : []);
+  const count = resultItems.length;
+  batchStats.innerText = `Processamento concluido em ${duration}s - ${count} pacote(s) analisado(s)`;
+  batchStats.classList.remove('hidden');
+  if (results && results.error) {
+    displayMessage(results.error, 'error');
+    return;
+  }
+  resultsContainer.classList.remove('hidden');
+  batchActions.classList.remove('hidden');
+  resultadosLote = resultItems;
+  missingRouteItems = [];
+  let totalFound = 0;
+  suggestionsList.innerHTML = '';
+  resultItems.forEach((item, batchIndex) => {
+    const original = item.original || {};
+    const allSuggestions = item.suggestions || [];
+    const bestSuggestion = allSuggestions[0] || {};
+    const li = document.createElement('li');
+    li.className = 'p-5 bg-white relative hover:bg-[#fffdfb] transition';
+    li.id = `batch-card-${batchIndex}`;
+    const manualButtonHtml = `
+      <button onclick="openOverrideModal(${batchIndex})" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-3 rounded-xl border border-gray-300 transition">
+        <i class="fa-solid fa-pen-to-square mr-1"></i>Alterar Destino
+      </button>
+    `;
+    let cardContent = '';
+    if (item.error) {
+      missingRouteItems.push({ code: item.packageCode, reason: 'Pacote nao encontrado na base', original: original });
+      cardContent = `
+        <div class="rounded-2xl border border-red-200 bg-red-50 p-4">
+          <div class="flex justify-between items-start gap-3">
+            <div>
+              <h3 class="font-black text-gray-900 text-lg">${escapeHtml(item.packageCode)}</h3>
+              <p class="text-sm text-red-600 mt-1 font-bold"><i class="fa-solid fa-circle-xmark mr-1"></i>Pacote nao encontrado na base.</p>
+            </div>
+            <input type="checkbox" id="batch-check-${batchIndex}" data-index="${batchIndex}" class="form-checkbox h-5 w-5 text-green-600 print-checkbox mt-1 opacity-50 cursor-not-allowed" disabled>
+          </div>
+          <div class="mt-3">${manualButtonHtml}</div>
+          <div id="manual-override-container-${batchIndex}" class="hidden mt-3 p-3 bg-blue-50 border border-blue-200 rounded-xl"></div>
+        </div>
+      `;
+    } else if (allSuggestions.length > 0) {
+      totalFound++;
+      const criterionTag = getCriterionTag(bestSuggestion.criterion);
+      let selectHtml = `<select id="batch-select-${batchIndex}" class="suggestion-select" data-batch-index="${batchIndex}" onchange="updateBatchCard(this)">`;
+      allSuggestions.forEach((sug, sugIndex) => {
+        const isSelected = sugIndex === 0 ? 'selected' : '';
+        const displayedVolume = parseInt(sug.orderCount, 10) || 0;
+        const plannedCount = parseInt(sug.plannedCount, 10) || displayedVolume || 1;
+        const distance = Number(sug.distance);
+        const distanceText = !isNaN(distance) && distance < 9999 ? ` | ${distance.toFixed(1)} km` : '';
+        selectHtml += `
+          <option value="${sugIndex}" ${isSelected}
+            data-route="${escapeHtmlAttr(sug.route)}"
+            data-original-count="${displayedVolume}"
+            data-planned-count="${plannedCount}"
+            data-vehicle="${escapeHtmlAttr(sug.vehicle)}"
+            data-cluster="${escapeHtmlAttr(sug.cluster)}"
+            data-criterion="${escapeHtmlAttr(sug.criterion)}"
+            data-distance="${escapeHtmlAttr(sug.distance === undefined ? '' : sug.distance)}">
+            ${escapeHtml(sug.route)} (${escapeHtml(sug.cluster)}) | ${escapeHtml(sug.criterion || 'AUTO')}${distanceText} | ${escapeHtml(sug.vehicle || 'N/A')}
+          </option>
+        `;
+      });
+      selectHtml += '</select>';
+      const distance = Number(bestSuggestion.distance);
+      const distancePill = !isNaN(distance) && distance < 9999
+        ? `<span class="text-xs font-bold px-2 py-1 rounded-full bg-purple-100 text-purple-700"><i class="fa-solid fa-location-crosshairs mr-1"></i>${distance.toFixed(2)} km</span>`
+        : '';
+      cardContent = `
+        <div class="rounded-2xl border border-[#f2ddd6] bg-white p-4 shadow-sm">
+          <div class="flex justify-between items-start gap-3">
+            <div class="min-w-0">
+              <h3 class="font-black text-gray-900 text-lg leading-tight">${escapeHtml(item.packageCode)}</h3>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <span class="text-xs font-bold px-2 py-1 rounded-full bg-gray-100 text-gray-700"><i class="fa-solid fa-route mr-1"></i>Origem: ${escapeHtml(original.route || 'N/A')}</span>
+                <span class="text-xs font-bold px-2 py-1 rounded-full bg-orange-50 text-orange-700"><i class="fa-solid fa-truck mr-1"></i>${escapeHtml(original.vehicle || 'N/A')}</span>
+                <span class="text-xs font-bold px-2 py-1 rounded-full bg-blue-50 text-blue-700"><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(original.neighborhood || 'Local N/A')}</span>
+              </div>
+            </div>
+            <input type="checkbox" id="batch-check-${batchIndex}" data-index="${batchIndex}" class="form-checkbox h-5 w-5 text-green-600 print-checkbox mt-1" checked>
+          </div>
+          <div class="mt-4 flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center gap-2 flex-wrap">
+              ${criterionTag}
+              ${distancePill}
+              <span class="text-xs font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-700"><i class="fa-solid fa-shuffle mr-1"></i>Rodizio dinamico</span>
+            </div>
+            ${manualButtonHtml}
+          </div>
+          <div id="default-selection-area-${batchIndex}" class="mt-3 p-3 bg-[#fff8f5] rounded-2xl border border-[#f2ddd6]">
+            <div class="text-[#c93d20] font-semibold mb-2 text-xs uppercase tracking-wide">
+              <i class="fa-solid fa-route mr-1"></i>Selecao balanceada
+            </div>
+            ${selectHtml}
+            <div id="selected-sug-info-${batchIndex}" class="text-sm mt-3"></div>
+          </div>
+          <div id="manual-override-container-${batchIndex}" class="hidden mt-3 p-3 bg-blue-50 border border-blue-100 rounded-2xl"></div>
+        </div>
+      `;
+    } else {
+      missingRouteItems.push({ code: item.packageCode, reason: 'Sem rota compativel', original: original });
+      cardContent = `
+        <div class="rounded-2xl border border-yellow-200 bg-yellow-50 p-4">
+          <div class="flex justify-between items-start gap-3">
+            <div>
+              <h3 class="font-black text-gray-900 text-lg">${escapeHtml(item.packageCode)}</h3>
+              <p class="text-xs text-gray-600 mt-1">Origem: ${escapeHtml(original.route || 'N/A')} (${escapeHtml(original.cluster || 'N/A')})</p>
+              <p class="text-xs text-gray-700 font-semibold mt-2"><i class="fa-solid fa-map-pin mr-1 text-[#ee4d2d]"></i>${escapeHtml(original.neighborhood || 'Local N/A')}</p>
+            </div>
+            <input type="checkbox" id="batch-check-${batchIndex}" data-index="${batchIndex}" class="form-checkbox h-5 w-5 text-green-600 print-checkbox mt-1" disabled>
+          </div>
+          <div class="mt-3 p-3 bg-white border border-yellow-200 rounded-2xl text-sm text-yellow-800 font-bold">
+            <i class="fa-solid fa-triangle-exclamation mr-2 text-yellow-600"></i>Sem rota sugerida automatica.
+          </div>
+          <div class="mt-3">${manualButtonHtml}</div>
+          <div id="manual-override-container-${batchIndex}" class="hidden mt-3 p-3 bg-blue-50 border border-blue-200 rounded-2xl"></div>
+        </div>
+      `;
+    }
+    li.innerHTML = cardContent;
+    suggestionsList.appendChild(li);
+  });
+  resultsHeader.innerHTML = `<i class="fa-solid fa-list-check text-[#ee4d2d]"></i> Resultados do Processamento (${totalFound} com sugestao automatica)`;
+  calculateConsolidatedCounts();
+  if (missingRouteItems.length > 0) openMissingRoutesModal(missingRouteItems);
+}
+function handleSuccessBatch(results) {
+  toggleBatchLoading(false);
+  const duration = ((Date.now() - batchStartTime) / 1000).toFixed(2);
+  const count = results ? results.length : 0;
+  batchStats.innerText = `Processamento concluído em ${duration}s • ${count} resultados retornados`;
+  batchStats.classList.remove('hidden');
+  if (results.error) {
+    displayMessage(results.error, 'error');
+    return;
+  }
+  resultsContainer.classList.remove('hidden');
+  batchActions.classList.remove('hidden');
+  resultadosLote = results;
+  let totalFound = 0;
+  suggestionsList.innerHTML = '';
+  results.forEach((item, batchIndex) => {
+    const original = item.original || {};
+    const allSuggestions = item.suggestions || [];
+    const li = document.createElement('li');
+    li.classList.add('p-5', 'bg-white', 'relative');
+    li.id = `batch-card-${batchIndex}`;
+    const manualButtonHtml = `
+      <button onclick="openOverrideModal(${batchIndex})" class="mt-2 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-3 rounded-xl border border-gray-300 transition">
+        <i class="fa-solid fa-pen-to-square mr-1"></i>Selecionar Outra (Manual)
+      </button>
+    `;
+    let cardContent = '';
+    if (item.error) {
+      cardContent = `
+        <div class="flex justify-between items-start gap-3">
+          <div>
+            <h3 class="font-bold text-gray-900">${escapeHtml(item.packageCode)}</h3>
+            <p class="text-sm text-red-500 mt-1"><i class="fa-solid fa-circle-xmark mr-1"></i>Pacote não encontrado na base.</p>
+          </div>
+          <input type="checkbox" id="batch-check-${batchIndex}" data-index="${batchIndex}" class="form-checkbox h-5 w-5 text-green-600 print-checkbox mt-1 opacity-50 cursor-not-allowed" disabled>
+        </div>
+        ${manualButtonHtml}
+        <div id="manual-override-container-${batchIndex}" class="hidden mt-3 p-3 bg-blue-50 border border-blue-200 rounded-xl"></div>
+      `;
+    } else if (allSuggestions.length > 0) {
+      totalFound++;
+      const bestIndex = 0;
+      const criterionTag = getCriterionTag(allSuggestions[bestIndex].criterion);
+      let selectHtml = `<select id="batch-select-${batchIndex}" class="suggestion-select" data-batch-index="${batchIndex}" onchange="updateBatchCard(this)">`;
+      allSuggestions.forEach((sug, sugIndex) => {
+        const isSelected = sugIndex === bestIndex ? 'selected' : '';
+        const displayedVolume = parseInt(sug.orderCount, 10) || 0;
+        selectHtml += `
+          <option value="${sugIndex}" ${isSelected}
+            data-route="${escapeHtmlAttr(sug.route)}"
+            data-original-count="${displayedVolume}"
+            data-vehicle="${escapeHtmlAttr(sug.vehicle)}"
+            data-cluster="${escapeHtmlAttr(sug.cluster)}"
+            data-criterion="${escapeHtmlAttr(sug.criterion)}"
+            data-distance="${escapeHtmlAttr(sug.distance === undefined ? '' : sug.distance)}">
+            ${escapeHtml(sug.route)} (${escapeHtml(sug.cluster)}) | ${escapeHtml(sug.vehicle)} | Vol: ${displayedVolume}
+          </option>
+        `;
+      });
+      selectHtml += '</select>';
+      cardContent = `
+        <div class="flex justify-between items-start gap-3">
+          <div>
+            <h3 class="font-bold text-gray-900">${escapeHtml(item.packageCode)}</h3>
+            <p class="text-xs text-gray-500 mt-1">Rota antiga: ${escapeHtml(original.route || 'N/A')} (${escapeHtml(original.cluster || 'N/A')})</p>
+            <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-truck mr-1 text-gray-400"></i>Veículo origem: <strong>${escapeHtml(original.vehicle || 'N/A')}</strong></p>
+            <p class="text-xs text-gray-700 font-semibold mt-2"><i class="fa-solid fa-map-pin mr-1 text-[#ee4d2d]"></i>${escapeHtml(original.neighborhood || 'Local N/A')}</p>
+          </div>
+          <input type="checkbox" id="batch-check-${batchIndex}" data-index="${batchIndex}" class="form-checkbox h-5 w-5 text-green-600 print-checkbox mt-1" checked>
+        </div>
+        <div class="mt-3 flex items-center justify-between gap-2 flex-wrap">
+          ${criterionTag}
+          ${manualButtonHtml}
+        </div>
+        <div id="default-selection-area-${batchIndex}" class="mt-3 p-3 bg-[#fff8f5] rounded-2xl border border-[#f2ddd6]">
+          <div class="text-[#c93d20] font-semibold mb-2 text-xs uppercase tracking-wide">
+            <i class="fa-solid fa-route mr-1"></i>Rota sugerida balanceada
+          </div>
+          ${selectHtml}
+          <div id="selected-sug-info-${batchIndex}" class="text-sm mt-3 space-y-1"></div>
+        </div>
+        <div id="manual-override-container-${batchIndex}" class="hidden mt-3 p-3 bg-blue-50 border border-blue-100 rounded-2xl"></div>
+      `;
+    } else {
+      cardContent = `
+        <div class="flex justify-between items-start gap-3">
+          <div>
+            <h3 class="font-bold text-gray-900">${escapeHtml(item.packageCode)}</h3>
+            <p class="text-xs text-gray-500 mt-1">Rota antiga: ${escapeHtml(original.route || 'N/A')}</p>
+            <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-truck mr-1 text-gray-400"></i>Veículo origem: <strong>${escapeHtml(original.vehicle || 'N/A')}</strong></p>
+            <p class="text-xs text-gray-700 font-semibold mt-2"><i class="fa-solid fa-map-pin mr-1 text-[#ee4d2d]"></i>${escapeHtml(original.neighborhood || 'Local N/A')}</p>
+          </div>
+          <input type="checkbox" id="batch-check-${batchIndex}" data-index="${batchIndex}" class="form-checkbox h-5 w-5 text-green-600 print-checkbox mt-1" disabled>
+        </div>
+        <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-2xl text-sm text-yellow-800 flex items-center justify-between">
+          <div class="flex items-center">
+            <i class="fa-solid fa-triangle-exclamation mr-2 text-yellow-600"></i>
+            <span>Sem rota sugerida automática.</span>
+          </div>
+        </div>
+        ${manualButtonHtml}
+        <div id="manual-override-container-${batchIndex}" class="hidden mt-3 p-3 bg-blue-50 border border-blue-200 rounded-2xl"></div>
+      `;
+    }
+    li.innerHTML = cardContent;
+    suggestionsList.appendChild(li);
+  });
+  resultsHeader.innerHTML = `<i class="fa-solid fa-list-check text-[#ee4d2d]"></i> Resultados do Processamento (${totalFound} com sugestão automática)`;
+  calculateConsolidatedCounts();
+}
+function handleFailure(error) {
+  toggleBatchLoading(false);
+  loadingIndicator.classList.add('hidden');
+  displayMessage('Erro ao se comunicar com a planilha. Verifique a configuração ou tente novamente.', 'error');
+  console.error('Erro de comunicação com o Apps Script:', error);
+}
+function calculateConsolidatedCounts() {
+  const routeCounters = {};
+  const allSelects = document.querySelectorAll('.suggestion-select');
+  allSelects.forEach(selectElement => {
+    const batchIndex = parseInt(selectElement.dataset.batchIndex, 10);
+    const checkbox = document.getElementById(`batch-check-${batchIndex}`);
+    const defaultArea = document.getElementById(`default-selection-area-${batchIndex}`);
+    if (checkbox && checkbox.checked && defaultArea && !defaultArea.classList.contains('hidden')) {
+      const selectedOption = selectElement.options[selectElement.selectedIndex];
+      const selectedRoute = selectedOption.dataset.route;
+      if (selectedRoute) routeCounters[selectedRoute] = (routeCounters[selectedRoute] || 0) + 1;
+    }
+  });
+  document.querySelectorAll('input[type="hidden"][id^="manual-data-"]').forEach(input => {
+    const batchIndex = input.id.split('-')[2];
+    const checkbox = document.getElementById(`batch-check-${batchIndex}`);
+    if (checkbox && checkbox.checked) {
+      const data = JSON.parse(input.value);
+      if (data.route) routeCounters[data.route] = (routeCounters[data.route] || 0) + 1;
+    }
+  });
+  allSelects.forEach(selectElement => {
+    const batchIndex = parseInt(selectElement.dataset.batchIndex, 10);
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const selectedRoute = selectedOption.dataset.route;
+    const originalCount = parseInt(selectedOption.dataset.originalCount, 10) || 0;
+    const selectedVehicle = selectedOption.dataset.vehicle || 'N/A';
+    const selectedCluster = selectedOption.dataset.cluster || 'N/A';
+    const item = resultadosLote[batchIndex];
+    const suggestionData = item.suggestions[selectElement.value];
+    const historicReallocs = suggestionData.historicCount || 0;
+    const currentBatchAdded = routeCounters[selectedRoute] || 0;
+    const totalReallocated = historicReallocs + currentBatchAdded;
+    const reallocProgressText = `(${totalReallocated}/25)`;
+    const infoBlock = document.getElementById(`selected-sug-info-${batchIndex}`);
+    if (infoBlock) {
+      const selectedCriterionTag = getCriterionTag(suggestionData.criterion);
+      const progressColor = totalReallocated >= 25 ? 'text-red-600' : 'text-blue-600';
+      const distance = Number(suggestionData.distance);
+      const distanceLine = !isNaN(distance) && distance < 9999
+        ? `<p class="text-sm"><i class="fa-solid fa-location-crosshairs mr-1"></i>Distância GEO: <strong>${distance.toFixed(2)} km</strong></p>`
+        : '';
+      infoBlock.innerHTML = `
+        <p class="text-sm"><i class="fa-solid fa-map-pin mr-1"></i>Rota: <span class="font-semibold text-green-700">${escapeHtml(selectedRoute)}</span></p>
+        <p class="text-sm"><i class="fa-solid fa-thumbtack mr-1"></i>Cluster: ${escapeHtml(selectedCluster)}</p>
+        <p class="text-sm"><i class="fa-solid fa-car mr-1"></i>Veículo: ${escapeHtml(selectedVehicle)}</p>
+        <p class="text-sm"><i class="fa-solid fa-boxes-stacked mr-1"></i>SPR PLANEJADO: <strong>${originalCount}</strong> <span class="${progressColor} font-bold ml-1">${reallocProgressText}</span></p>
+        <p class="text-sm"><i class="fa-solid fa-barcode mr-1"></i>AT: ${escapeHtml(suggestionData.taskId)}</p>
+        <p class="text-sm"><i class="fa-solid fa-location-dot mr-1"></i>Bairro: ${escapeHtml(suggestionData.neighborhood || 'N/A')}</p>
+        ${distanceLine}
+        <p class="text-sm mt-1">Critério: ${selectedCriterionTag}</p>
+      `;
+    }
+    for (let i = 0; i < selectElement.options.length; i++) {
+      const opt = selectElement.options[i];
+      const routeName = opt.dataset.route;
+      const cluster = opt.dataset.cluster || 'N/A';
+      const vehicle = opt.dataset.vehicle || 'N/A';
+      const baseVol = parseInt(opt.dataset.originalCount, 10) || 0;
+      const criterion = opt.dataset.criterion || 'CLUSTER';
+      const criterionText = criterion === 'ZIP_OR_NEIGHBORHOOD' ? 'CEP/BAIRRO' :
+        criterion === 'GEO' ? 'GEO' :
+        criterion === 'CEP' ? 'CEP' :
+        criterion === 'MANUAL' ? 'MANUAL' : 'CLUSTER';
+      const sugIndex = opt.value;
+      const distance = Number(item.suggestions[sugIndex].distance);
+      const distanceText = !isNaN(distance) && distance < 9999 ? ` | ${distance.toFixed(2)} km` : '';
+      const currentRouteAdded = routeCounters[routeName] || 0;
+      const histVal = item.suggestions[sugIndex].historicCount || 0;
+      const totalProgress = histVal + currentRouteAdded;
+      opt.textContent = `${routeName} (${cluster}) | ${criterionText}${distanceText} | ${vehicle} | Vol: ${baseVol} (${totalProgress}/25)`;
+    }
+  });
+  const routesUsed = Object.keys(routeCounters).length;
+  if (routesUsed > 0 && batchStats && !batchStats.classList.contains('hidden')) {
+    const baseText = batchStats.innerText.split(' | ')[0];
+    batchStats.innerText = `${baseText} | ${routesUsed} rota(s) usadas no rodizio`;
+  }
+  document.querySelectorAll('.print-checkbox').forEach(checkbox => {
+    checkbox.onchange = calculateConsolidatedCounts;
+  });
+}
+function calculateConsolidatedCountsV2() {
+  const routeCounters = {};
+  const allSelects = document.querySelectorAll('.suggestion-select');
+  allSelects.forEach(selectElement => {
+    const batchIndex = parseInt(selectElement.dataset.batchIndex, 10);
+    const checkbox = document.getElementById(`batch-check-${batchIndex}`);
+    const defaultArea = document.getElementById(`default-selection-area-${batchIndex}`);
+    if (checkbox && checkbox.checked && defaultArea && !defaultArea.classList.contains('hidden')) {
+      const selectedOption = selectElement.options[selectElement.selectedIndex];
+      const selectedRoute = selectedOption.dataset.route;
+      if (selectedRoute) routeCounters[selectedRoute] = (routeCounters[selectedRoute] || 0) + 1;
+    }
+  });
+  document.querySelectorAll('input[type="hidden"][id^="manual-data-"]').forEach(input => {
+    const batchIndex = input.id.split('-')[2];
+    const checkbox = document.getElementById(`batch-check-${batchIndex}`);
+    if (checkbox && checkbox.checked) {
+      const data = JSON.parse(input.value);
+      if (data.route) routeCounters[data.route] = (routeCounters[data.route] || 0) + 1;
+    }
+  });
+  allSelects.forEach(selectElement => {
+    const batchIndex = parseInt(selectElement.dataset.batchIndex, 10);
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const selectedRoute = selectedOption.dataset.route;
+    const originalCount = parseInt(selectedOption.dataset.originalCount, 10) || 0;
+    const plannedCount = parseInt(selectedOption.dataset.plannedCount, 10) || Math.max(originalCount, 1);
+    const selectedVehicle = selectedOption.dataset.vehicle || 'N/A';
+    const selectedCluster = selectedOption.dataset.cluster || 'N/A';
+    const item = resultadosLote[batchIndex];
+    const suggestionData = item.suggestions[selectElement.value];
+    const historicReallocs = suggestionData.historicCount || 0;
+    const currentBatchAdded = routeCounters[selectedRoute] || 0;
+    const totalReallocated = historicReallocs + currentBatchAdded;
+    const batchPercent = Math.min(100, Math.round((currentBatchAdded / Math.max(plannedCount, 1)) * 100));
+    const totalPressure = Math.round((totalReallocated / Math.max(plannedCount, 1)) * 100);
+    const infoBlock = document.getElementById(`selected-sug-info-${batchIndex}`);
+    if (infoBlock) {
+      const selectedCriterionTag = getCriterionTag(suggestionData.criterion);
+      const distance = Number(suggestionData.distance);
+      const distanceLine = !isNaN(distance) && distance < 9999
+        ? `<p class="text-sm text-gray-700"><i class="fa-solid fa-location-crosshairs mr-1 text-purple-600"></i>Distancia GEO: <strong>${distance.toFixed(2)} km</strong></p>`
+        : '';
+      const pressureColor = totalPressure >= 40 ? 'text-red-600' : totalPressure >= 20 ? 'text-yellow-700' : 'text-green-700';
+      infoBlock.innerHTML = `
+        <div class="bg-white border border-[#f0ddd6] rounded-2xl p-3 shadow-sm">
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+            <div>
+              <p class="text-sm text-gray-800"><i class="fa-solid fa-map-pin mr-1 text-green-600"></i>Rota sugerida: <span class="font-black text-green-700">${escapeHtml(selectedRoute)}</span></p>
+              <p class="text-sm text-gray-700 mt-1"><i class="fa-solid fa-thumbtack mr-1"></i>Cluster: <strong>${escapeHtml(selectedCluster)}</strong></p>
+              <p class="text-sm text-gray-700 mt-1"><i class="fa-solid fa-car mr-1"></i>Modal: <strong>${escapeHtml(selectedVehicle)}</strong></p>
+              <p class="text-sm text-gray-700 mt-1"><i class="fa-solid fa-barcode mr-1"></i>AT: <span class="font-mono text-xs bg-gray-100 px-1 rounded">${escapeHtml(suggestionData.taskId)}</span></p>
+              <p class="text-sm text-gray-700 mt-1"><i class="fa-solid fa-location-dot mr-1"></i>Bairro: ${escapeHtml(suggestionData.neighborhood || 'N/A')}</p>
+              ${distanceLine}
+            </div>
+            <div class="shrink-0">${selectedCriterionTag}</div>
+          </div>
+          <div class="mt-3 border-t border-[#f0ddd6] pt-3">
+            <div class="flex items-center justify-between text-xs font-bold text-gray-600 mb-1">
+              <span><i class="fa-solid fa-shuffle mr-1 text-[#ee4d2d]"></i>Rodizio no lote: +${currentBatchAdded}/${plannedCount}</span>
+              <span class="${pressureColor}">${totalPressure}% pressao total</span>
+            </div>
+            <div class="w-full bg-[#f2e8e4] rounded-full h-2 overflow-hidden">
+              <div class="bg-[#ee4d2d] h-2 rounded-full" style="width:${batchPercent}%"></div>
+            </div>
+            <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-2"><span class="block text-gray-500">Planejado</span><strong>${plannedCount}</strong></div>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-2"><span class="block text-gray-500">Historico</span><strong>${historicReallocs}</strong></div>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-2"><span class="block text-gray-500">Lote</span><strong>+${currentBatchAdded}</strong></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    for (let i = 0; i < selectElement.options.length; i++) {
+      const opt = selectElement.options[i];
+      const routeName = opt.dataset.route;
+      const cluster = opt.dataset.cluster || 'N/A';
+      const vehicle = opt.dataset.vehicle || 'N/A';
+      const planned = parseInt(opt.dataset.plannedCount, 10) || 1;
+      const criterion = opt.dataset.criterion || 'CLUSTER';
+      const criterionText = criterion === 'ZIP_OR_NEIGHBORHOOD' ? 'CEP/BAIRRO' :
+        criterion === 'GEO' ? 'GEO' :
+        criterion === 'CEP' ? 'CEP' :
+        criterion === 'MANUAL' ? 'MANUAL' : 'CLUSTER';
+      const sugIndex = opt.value;
+      const distance = Number(item.suggestions[sugIndex].distance);
+      const distanceText = !isNaN(distance) && distance < 9999 ? ` | ${distance.toFixed(1)} km` : '';
+      const currentRouteAdded = routeCounters[routeName] || 0;
+      const histVal = item.suggestions[sugIndex].historicCount || 0;
+      const totalProgress = histVal + currentRouteAdded;
+      opt.textContent = `${routeName} (${cluster}) | ${criterionText}${distanceText} | ${vehicle} | Lote +${currentRouteAdded}/${planned} | Total ${totalProgress}`;
+    }
+  });
+  const routesUsedV2 = Object.keys(routeCounters).length;
+  if (routesUsedV2 > 0 && batchStats && !batchStats.classList.contains('hidden')) {
+    const baseText = batchStats.innerText.split(' | ')[0];
+    batchStats.innerText = `${baseText} | ${routesUsedV2} rota(s) usadas no rodizio`;
+  }
+  document.querySelectorAll('.print-checkbox').forEach(checkbox => {
+    checkbox.onchange = calculateConsolidatedCounts;
+  });
+}
+calculateConsolidatedCounts = calculateConsolidatedCountsV2;
+function getSelectedItems() {
+  const checkboxes = document.querySelectorAll('.print-checkbox:checked');
+  if (!checkboxes.length) return [];
+  return Array.from(checkboxes).map(cb => {
+    const idx = cb.dataset.index;
+    const item = resultadosLote[idx];
+    const manualInput = document.getElementById(`manual-data-${idx}`);
+    if (manualInput) {
+      const manualData = JSON.parse(manualInput.value);
+      const safeOriginal = item.original || {
+        stationName: 'MANUAL',
+        route: 'N/A',
+        driverName: 'N/A',
+        driverId: 'N/A',
+        agency: 'N/A',
+        vehicle: 'N/A',
+        orderCount: 0
+      };
+      return {
+        code: item.packageCode,
+        original: safeOriginal,
+        suggestion: {
+          route: manualData.route,
+          taskId: manualData.taskId,
+          vehicle: 'MANUAL_OVERRIDE',
+          driverName: 'ALOCACAO MANUAL',
+          driverId: 'MANUAL',
+          agency: 'MANUAL',
+          orderCount: 1,
+          criterion: 'MANUAL'
+        },
+        taskId: manualData.taskId,
+        printRoute: manualData.route,
+        printOldRoute: safeOriginal.route
+      };
+    }
+    const select = document.getElementById(`batch-select-${idx}`);
+    if (!select) return null;
+    const suggestion = item.suggestions[select.value];
+    return {
+      code: item.packageCode,
+      original: item.original,
+      suggestion: suggestion,
+      taskId: suggestion.taskId,
+      printRoute: suggestion.route,
+      printOldRoute: item.original.route
+    };
+  }).filter(Boolean);
+}
+function printLabelsBatch() {
+  const items = getSelectedItems();
+  if (!items.length) {
+    displayMessage('Nenhum item selecionado.', 'info');
+    return;
+  }
+  const html = items.map(it => createLabelHtml(it.code, it.printRoute, it.taskId, it.printOldRoute)).join('');
+  printInternal(html);
+  displayMessage(`Imprimindo e salvando ${items.length} itens...`, 'info');
+  google.script.run
+    .withSuccessHandler(response => {
+      displayMessage(`Sucesso! ${response.count} itens impressos e salvos.`, 'success');
+    })
+    .withFailureHandler(error => displayMessage('Erro ao salvar: ' + error.message, 'error'))
+    .saveBatchToAT(items);
+}
+function saveReportOnly() {
+  const items = getSelectedItems();
+  if (!items.length) {
+    displayMessage('Nenhum item selecionado.', 'info');
+    return;
+  }
+  displayMessage(`Salvando ${items.length} itens sem impressão...`, 'info');
+  google.script.run
+    .withSuccessHandler(response => {
+      displayMessage(`Relatório salvo. ${response.count} registros atualizados.`, 'success');
+    })
+    .withFailureHandler(error => displayMessage('Erro ao salvar relatório: ' + error.message, 'error'))
+    .saveBatchToAT(items);
+}
+function createLabelHtml(code, route, task, oldRoute) {
+  const date = new Date().toLocaleDateString('pt-BR');
+  return `
+    <div class="etiqueta">
+      <div class="rota-nova">${escapeHtml(route || 'ERRO')}</div>
+      <div style="font-size:10px;text-align:center;font-weight:bold">PACOTE REALOCADO</div>
+      <div class="linha"></div>
+      <div style="display:flex;justify-content:space-between">
+        <div class="detalhes"><strong>CÓD.:</strong> ${escapeHtml(code)}</div>
+        <div class="detalhes"><strong>DATA:</strong> ${escapeHtml(date)}</div>
+      </div>
+      <div class="linha"></div>
+      <div class="detalhes"><strong>AT:</strong> ${escapeHtml(task)}</div>
+      <div class="linha"></div>
+      <div class="rota-antiga">Rota Antiga: ${escapeHtml(oldRoute)}</div>
+    </div>
+  `;
+}
+function printInternal(content) {
+  const printArea = document.getElementById('printArea');
+  printArea.innerHTML = content;
+  document.body.classList.add('printing-labels');
+  const cleanup = () => {
+    document.body.classList.remove('printing-labels');
+    printArea.innerHTML = '';
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  setTimeout(() => window.print(), 120);
+  setTimeout(cleanup, 5000);
+}
+function loadAllRoutes() {
+  google.script.run
+    .withSuccessHandler(routes => {
+      allRoutesCache = Array.isArray(routes) ? routes : [];
+      updateRouteMeta(manualRouteInput, manualRouteMeta);
+      updateRouteMeta(overrideRouteInput, overrideRouteMeta);
+    })
+    .getAllRoutesList();
+}
+function setupRouteAutocomplete() {
+  bindRouteAutocomplete(manualRouteInput, manualRouteSuggestions, manualRouteMeta);
+  bindRouteAutocomplete(overrideRouteInput, overrideRouteSuggestions, overrideRouteMeta);
+}
+function bindRouteAutocomplete(inputElement, suggestionsElement, metaElement) {
+  inputElement.addEventListener('input', () => renderRouteSuggestions(inputElement, suggestionsElement, metaElement));
+  inputElement.addEventListener('focus', () => renderRouteSuggestions(inputElement, suggestionsElement, metaElement));
+}
+function getFilteredRoutes(query) {
+  const normalizedQuery = normalizeClientText(query);
+  if (!normalizedQuery) return allRoutesCache.slice();
+  return allRoutesCache.filter(route => {
+    const haystack = [
+      route.route,
+      route.taskId,
+      route.neighborhood,
+      route.cluster,
+      route.vehicle
+    ].map(normalizeClientText).join(' ');
+    return haystack.includes(normalizedQuery);
+  });
+}
+function renderRouteSuggestions(inputElement, suggestionsElement, metaElement) {
+  const matches = getFilteredRoutes(inputElement.value);
+  updateRouteMeta(inputElement, metaElement);
+  if (!matches.length) {
+    suggestionsElement.innerHTML = '';
+    suggestionsElement.classList.add('hidden');
+    return;
+  }
+  suggestionsElement.innerHTML = `
+    <div class="route-suggestion-count">${matches.length} rota(s) disponível(is)</div>
+    ${matches.map(route => `
+      <button type="button" class="route-suggestion-item" onclick="selectRouteSuggestion('${inputElement.id}', '${suggestionsElement.id}', '${metaElement.id}', '${escapeJsString(route.route)}')">
+        <div class="font-bold text-gray-900">${escapeHtml(route.route)}</div>
+        <div class="text-xs text-gray-500 mt-1">AT: ${escapeHtml(route.taskId || 'N/A')}${route.cluster ? ` • Cluster: ${escapeHtml(route.cluster)}` : ''}${route.vehicle ? ` • ${escapeHtml(route.vehicle)}` : ''}</div>
+        <div class="text-sm text-[#c93d20] mt-1"><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(route.neighborhood || 'Bairro não informado')}</div>
+      </button>
+    `).join('')}
+  `;
+  suggestionsElement.classList.remove('hidden');
+}
+function selectRouteSuggestion(inputId, suggestionsId, metaId, routeName) {
+  const inputElement = document.getElementById(inputId);
+  const suggestionsElement = document.getElementById(suggestionsId);
+  const metaElement = document.getElementById(metaId);
+  inputElement.value = routeName;
+  suggestionsElement.classList.add('hidden');
+  updateRouteMeta(inputElement, metaElement);
+}
+function findRouteByName(routeName) {
+  const normalizedName = normalizeClientText(routeName);
+  return allRoutesCache.find(route => normalizeClientText(route.route) === normalizedName);
+}
+function updateRouteMeta(inputElement, metaElement) {
+  const routeObj = findRouteByName(inputElement.value.trim());
+  if (!routeObj) {
+    metaElement.classList.add('hidden');
+    metaElement.innerHTML = '';
+    return;
+  }
+  metaElement.innerHTML = `AT: <strong>${escapeHtml(routeObj.taskId || 'N/A')}</strong> • Bairro: <strong>${escapeHtml(routeObj.neighborhood || 'Não informado')}</strong>`;
+  metaElement.classList.remove('hidden');
+}
+function openManualModal() {
+  document.getElementById('manualModal').classList.remove('hidden');
+  document.getElementById('manualPackageCode').value = '';
+  manualRouteInput.value = '';
+  manualRouteMeta.classList.add('hidden');
+  manualRouteSuggestions.classList.add('hidden');
+  document.getElementById('manualPackageCode').focus();
+}
+function closeManualModal() {
+  document.getElementById('manualModal').classList.add('hidden');
+}
+function processManualPackage() {
+  const code = sanitizeScannedCode(document.getElementById('manualPackageCode').value);
+  const routeName = manualRouteInput.value.trim();
+  if (!code) {
+    alert('Digite o código do pacote.');
+    return;
+  }
+  if (!routeName) {
+    alert('Selecione uma rota.');
+    return;
+  }
+  const routeObj = findRouteByName(routeName);
+  const taskIdRef = routeObj ? routeObj.taskId : 'MANUAL';
+  const finalRouteName = routeObj ? routeObj.route : routeName;
+  printInternal(createLabelHtml(code, finalRouteName, taskIdRef, 'EXTRA / NÃO LISTADO'));
+  const btn = document.querySelector('#manualModal .primary-btn');
+  const oldText = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Salvando...';
+  btn.disabled = true;
+  google.script.run
+    .withSuccessHandler(() => {
+      showScanToast(code, 'success', 'Pacote extra salvo');
+      displayMessage(`Pacote extra ${escapeHtml(code)} registrado na rota ${escapeHtml(finalRouteName)}.`, 'success');
+      btn.innerHTML = oldText;
+      btn.disabled = false;
+      document.getElementById('manualPackageCode').value = '';
+      manualRouteInput.value = '';
+      manualRouteMeta.classList.add('hidden');
+      manualRouteSuggestions.classList.add('hidden');
+      document.getElementById('manualPackageCode').focus();
+    })
+    .withFailureHandler(err => {
+      alert('Erro ao salvar: ' + err.message);
+      btn.innerHTML = oldText;
+      btn.disabled = false;
+    })
+    .saveManualPackage(code, finalRouteName, taskIdRef);
+}
+function openOverrideModal(batchIndex) {
+  currentBatchOverrideIndex = batchIndex;
+  const pkgCode = resultadosLote[batchIndex].packageCode;
+  document.getElementById('overrideModalSubtitle').innerText = `Definindo rota para: ${pkgCode}`;
+  overrideRouteInput.value = '';
+  overrideRouteMeta.classList.add('hidden');
+  overrideRouteSuggestions.classList.add('hidden');
+  document.getElementById('overrideModal').classList.remove('hidden');
+  overrideRouteInput.focus();
+}
+function closeOverrideModal() {
+  document.getElementById('overrideModal').classList.add('hidden');
+  currentBatchOverrideIndex = null;
+}
+function confirmOverride() {
+  if (currentBatchOverrideIndex === null) return;
+  const routeName = overrideRouteInput.value.trim();
+  if (!routeName) {
+    alert('Por favor, selecione ou digite uma rota.');
+    return;
+  }
+  const routeObj = findRouteByName(routeName);
+  const finalRouteName = routeObj ? routeObj.route : routeName;
+  const taskIdRef = routeObj ? routeObj.taskId : 'MANUAL';
+  const neighborhood = routeObj ? routeObj.neighborhood : '';
+  applyManualOverrideToCard(currentBatchOverrideIndex, finalRouteName, taskIdRef, neighborhood);
+  closeOverrideModal();
+}
+function applyManualOverrideToCard(index, routeName, taskId, neighborhood) {
+  const defaultArea = document.getElementById(`default-selection-area-${index}`);
+  if (defaultArea) defaultArea.classList.add('hidden');
+  const manualContainer = document.getElementById(`manual-override-container-${index}`);
+  manualContainer.innerHTML = `
+    <div class="flex justify-between items-center gap-3">
+      <div>
+        <p class="text-xs font-bold text-blue-800 uppercase mb-1">
+          <i class="fa-solid fa-hand-pointer mr-1"></i>Seleção Manual
+        </p>
+        <p class="text-lg font-black text-blue-900 leading-none">${escapeHtml(routeName)}</p>
+        <p class="text-xs text-blue-600 mt-1">AT Ref: ${escapeHtml(taskId)}</p>
+        <p class="text-xs text-blue-700 mt-1">${escapeHtml(neighborhood || 'Bairro não informado')}</p>
+      </div>
+      <button onclick="revertToAuto(${index})" class="text-xs text-blue-500 hover:text-blue-700 underline">
+        Desfazer
+      </button>
+    </div>
+    <input type="hidden" id="manual-data-${index}" value='${escapeHtmlAttr(JSON.stringify({ route: routeName, taskId: taskId }))}'>
+  `;
+  manualContainer.classList.remove('hidden');
+  const checkbox = document.getElementById(`batch-check-${index}`);
+  checkbox.disabled = false;
+  checkbox.checked = true;
+  checkbox.classList.remove('opacity-50', 'cursor-not-allowed');
+  calculateConsolidatedCounts();
+}
+function revertToAuto(index) {
+  const manualContainer = document.getElementById(`manual-override-container-${index}`);
+  manualContainer.innerHTML = '';
+  manualContainer.classList.add('hidden');
+  const defaultArea = document.getElementById(`default-selection-area-${index}`);
+  const checkbox = document.getElementById(`batch-check-${index}`);
+  if (defaultArea) {
+    defaultArea.classList.remove('hidden');
+    checkbox.checked = true;
+  } else {
+    checkbox.checked = false;
+    checkbox.disabled = true;
+    checkbox.classList.add('opacity-50', 'cursor-not-allowed');
+  }
+  calculateConsolidatedCounts();
+}
+function openMissingRoutesModal(items) {
+  missingRouteItems = items || [];
+  if (!missingRouteItems.length) return;
+  missingRoutesSummary.textContent = `${missingRouteItems.length} pacote(s) precisam de rota manual ou revisao de base.`;
+  missingRoutesList.innerHTML = missingRouteItems.map((item, index) => {
+    const original = item.original || {};
+    return `
+      <div class="rounded-2xl border border-yellow-200 bg-yellow-50 p-3">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="font-black text-gray-900">${escapeHtml(item.code || '')}</div>
+            <div class="text-xs text-yellow-800 font-bold mt-1">${escapeHtml(item.reason || 'Sem rota')}</div>
+            <div class="text-xs text-gray-600 mt-1">Origem: ${escapeHtml(original.route || 'N/A')} | Bairro: ${escapeHtml(original.neighborhood || 'N/A')}</div>
+          </div>
+          <button onclick="focusMissingRouteCard('${escapeJsString(item.code || '')}')" class="text-xs bg-white border border-yellow-300 text-yellow-800 rounded-xl px-3 py-2 font-bold hover:bg-yellow-100">
+            Ver card
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  missingRoutesModal.classList.remove('hidden');
+}
+function closeMissingRoutesModal() {
+  missingRoutesModal.classList.add('hidden');
+}
+function copyMissingRoutes() {
+  const text = missingRouteItems.map(item => item.code).filter(Boolean).join('\n');
+  if (!text) return;
+  if (!navigator.clipboard || !navigator.clipboard.writeText) {
+    displayMessage('Nao foi possivel copiar automaticamente. Selecione os codigos no popup.', 'info');
+    return;
+  }
+  navigator.clipboard.writeText(text)
+    .then(() => displayMessage(`${missingRouteItems.length} codigo(s) sem rota copiados.`, 'success'))
+    .catch(() => displayMessage('Nao consegui copiar automaticamente.', 'error'));
+}
+function focusMissingRouteCard(code) {
+  const targetIndex = resultadosLote.findIndex(item => String(item.packageCode || '').toUpperCase() === String(code || '').toUpperCase());
+  closeMissingRoutesModal();
+  if (targetIndex < 0) return;
+  const card = document.getElementById(`batch-card-${targetIndex}`);
+  if (card) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('ring-4', 'ring-yellow-300');
+    setTimeout(() => card.classList.remove('ring-4', 'ring-yellow-300'), 1800);
+  }
+}
+function openHistoryModal() {
+  document.getElementById('historyModal').classList.remove('hidden');
+  document.getElementById('historyCodesInput').focus();
+}
+function closeHistoryModal() {
+  document.getElementById('historyModal').classList.add('hidden');
+  document.getElementById('historyCodesInput').value = '';
+}
+function updateBatchCard() {
+  calculateConsolidatedCounts();
+}
+function processHistoryRebrand() {
+  const rawValue = document.getElementById('historyCodesInput').value.trim();
+  if (!rawValue) {
+    alert('Insira ao menos um código.');
+    return;
+  }
+  const codes = rawValue.split('\n').map(code => code.trim()).filter(Boolean);
+  const btn = document.querySelector('#historyModal button[onclick="processHistoryRebrand()"]');
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Buscando no histórico...';
+  btn.disabled = true;
+  google.script.run
+    .withSuccessHandler(results => {
+      btn.innerHTML = '<i class="fa-solid fa-gears mr-2"></i>Gerar Etiquetas';
+      btn.disabled = false;
+      if (results.error) {
+        alert(results.error);
         return;
       }
+      const foundItems = results.filter(result => result.found);
+      const notFound = results.filter(result => !result.found).map(result => result.code);
+      if (foundItems.length === 0) {
+        alert('Nenhum dos códigos informados foi encontrado na aba HISTÓRICOS.');
+        return;
+      }
+      const finalHtml = foundItems.map(item => createLabelHtml(item.code, item.printRoute, item.taskId, item.printOldRoute)).join('');
+      printInternal(finalHtml);
+      if (notFound.length > 0) {
+        alert(`Sucesso: ${foundItems.length} etiquetas geradas.\n\nNão encontrados no histórico:\n${notFound.join(', ')}`);
+      } else {
+        displayMessage(`Sucesso: ${foundItems.length} etiquetas geradas do histórico.`, 'success');
+      }
+      closeHistoryModal();
+    })
+    .withFailureHandler(err => {
+      alert('Erro: ' + err.message);
+      btn.disabled = false;
+    })
+    .getHistoryBatchForRebrand(codes);
+}
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+function escapeHtmlAttr(value) {
+  return escapeHtml(value);
+}
+function escapeJsString(value) {
+  return String(value ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\r?\n/g, ' ');
+}const expeditionState = {
+  scanMode: false,
+  queue: [],
+  processing: false,
+  currentCode: '',
+  lastReadCode: '',
+  lastReadAt: 0,
+  stats: { processed: 0, success: 0, fail: 0, noSuggestion: 0 },
+  recentLimit: 30,
+  bridgeInstalled: false
+};
 
-      var et = res.etiqueta;
-      estadoAtual = estadoAtual || {};
-      estadoAtual.etiqueta = et;
+const EXPEDITION_STORAGE_KEY = 'spx_expedicao_config_v1';
 
-      area.innerHTML = '<div class="card resultado">'
-        + '<div class="ok-icone">✅</div>'
-        + '<h2>Alocado em ' + res.atDestino + '</h2>'
-        + '<div class="sub">Corredor/Gaiola ' + res.cageDestino + (res.mesa ? ' · MESA ' + res.mesa : '') + ' · ' + res.cluster + '</div>'
-        + criarEtiquetaHtml(et)
-        + '<button onclick="imprimirEtiqueta()">🖨️ Imprimir etiqueta</button>'
-        + '<button class="secundario" onclick="proximoPacote()">Próximo pacote</button>'
-        + '</div>';
+window.addEventListener('load', initExpeditionTabFeature);
+
+function initExpeditionTabFeature() {
+  const shell = document.querySelector('.shell.ui-container');
+  const mainPanel = shell ? shell.querySelector('section.panel') : null;
+  if (!shell || !mainPanel || document.getElementById('expeditionPanel')) return;
+
+  mainPanel.id = 'mainOperationPanel';
+
+  const tabBar = document.createElement('section');
+  tabBar.className = 'panel mb-5 p-3';
+  tabBar.innerHTML = `
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+      <button id="openMainTabButton" class="rounded-xl border border-[#f0ddd6] bg-white px-4 py-3 font-extrabold text-[#7c2d12] transition hover:bg-[#fff8f5]">
+        <i class="fa-solid fa-table-columns mr-2"></i>Painel Completo
+      </button>
+      <button id="openExpeditionTabButton" class="rounded-xl border border-[#d8e8ff] bg-[#f8fbff] px-4 py-3 font-extrabold text-[#1d4ed8] transition hover:bg-[#eef5ff]">
+        <i class="fa-solid fa-bolt mr-2"></i>Inicio de Expedicao (Turbo)
+      </button>
+      <button id="openEhaTabButton" class="rounded-xl border border-[#fecaca] bg-[#fff5f5] px-4 py-3 font-extrabold text-[#b91c1c] transition hover:bg-[#fee2e2]">
+        <i class="fa-solid fa-truck-ramp-box mr-2"></i>EHA (Não Coube)
+      </button>
+    </div>
+  `;
+  shell.insertBefore(tabBar, mainPanel);
+
+  const expeditionPanel = document.createElement('section');
+  expeditionPanel.id = 'expeditionPanel';
+  expeditionPanel.className = 'panel p-5 md:p-7 mb-5 hidden';
+  expeditionPanel.innerHTML = `
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+      <div>
+        <h2 class="text-2xl md:text-3xl font-black text-gray-900">
+          <i class="fa-solid fa-rocket mr-2 text-[#ee4d2d]"></i>Inicio de Expedicao
+        </h2>
+        <p class="text-sm text-gray-600 mt-1">Modo rapido: bipou -> sugeriu -> salvou AT -> etiqueta pronta.</p>
+      </div>
+      <div class="text-xs font-bold uppercase tracking-[0.16em] text-[#c93d20] bg-[#fff6f2] border border-[#f0ddd6] rounded-full px-3 py-2">
+        Aba separada para operacao expressa
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-5">
+      <div class="space-y-4">
+        <div class="rounded-2xl border border-[#f0ddd6] bg-[#fffaf8] p-4">
+          <div class="section-title mb-3">
+            <i class="fa-solid fa-sliders text-[#ee4d2d]"></i>Configuracao Rapida
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-[0.12em]">Preferencia de Veiculo</label>
+              <select id="expPreferredVehicle" class="soft-select">
+                <option value="" selected>Sem preferencia</option>
+                <option value="VAN">VAN</option>
+                <option value="FIORINO">FIORINO</option>
+                <option value="PASSEIO">PASSEIO</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-[0.12em]">Prioridade de Busca</label>
+              <select id="expSearchPreference" class="soft-select">
+                <option value="ALL" selected>Todas as sugestoes</option>
+                <option value="GEO">Geolocalizacao</option>
+                <option value="CEP">Apenas CEP</option>
+                <option value="ZIP_OR_NEIGHBORHOOD">CEP / Bairro</option>
+                <option value="CLUSTER">Cluster</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
+            <button type="button" data-exp-preset data-vehicle="VAN" data-search="GEO" class="secondary-btn !py-2 !px-3 !text-xs">
+              GEO + VAN
+            </button>
+            <button type="button" data-exp-preset data-vehicle="FIORINO" data-search="ZIP_OR_NEIGHBORHOOD" class="secondary-btn !py-2 !px-3 !text-xs">
+              CEP/Bairro + FIORINO
+            </button>
+            <button type="button" data-exp-preset data-vehicle="" data-search="ALL" class="secondary-btn !py-2 !px-3 !text-xs">
+              Livre + Rodizio
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+            <label class="flex items-center gap-2 rounded-xl border border-[#dbeafe] bg-[#f6fbff] px-3 py-2">
+              <input id="expAutoPrint" type="checkbox" checked>
+              <span class="text-sm font-bold text-[#1e3a8a]">Imprimir etiqueta automaticamente</span>
+            </label>
+            <label class="flex items-center gap-2 rounded-xl border border-[#dcfce7] bg-[#f0fdf4] px-3 py-2">
+              <input id="expSendToCloud" type="checkbox">
+              <span class="text-sm font-bold text-[#166534]">Enviar leitura para nuvem</span>
+            </label>
+          </div>
+
+          <div class="mt-3">
+            <button id="expUseMainConfigButton" type="button" class="ghost-btn w-full">
+              <i class="fa-solid fa-link mr-2"></i>Copiar configuracao da aba principal
+            </button>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-[#f0ddd6] bg-white p-4">
+          <div class="section-title mb-3">
+            <i class="fa-solid fa-qrcode text-[#ee4d2d]"></i>Execucao Turbo
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <button id="expStartScannerButton" type="button" class="primary-btn">
+              <i class="fa-solid fa-camera mr-2"></i>Iniciar Bip Continuo
+            </button>
+            <button id="expStopScannerButton" type="button" class="secondary-btn hidden">
+              <i class="fa-solid fa-stop mr-2"></i>Encerrar Bip
+            </button>
+          </div>
+
+          <div class="mt-3 flex gap-3">
+            <button id="expCaptureQrButton" type="button" class="secondary-btn flex-1">
+              <i class="fa-solid fa-image mr-2"></i>Bip por Foto
+            </button>
+            <input id="expCaptureQrInput" type="file" accept="image/*" capture="environment" class="hidden">
+          </div>
+
+          <div class="mt-3 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
+            <input id="expManualCodeInput" type="text" class="soft-input uppercase" placeholder="Digite ou cole 1 codigo e pressione Enter">
+            <button id="expManualRunButton" type="button" class="primary-btn md:px-6">
+              <i class="fa-solid fa-play mr-2"></i>Processar
+            </button>
+          </div>
+
+          <div class="mt-3 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2">
+            <div id="expStatusText" class="text-sm font-bold text-emerald-700">Modo pronto para iniciar.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="rounded-2xl border border-[#e5e7eb] bg-white p-4">
+          <div class="section-title mb-3">
+            <i class="fa-solid fa-gauge-high text-[#1d4ed8]"></i>Painel de Controle
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div class="rounded-xl border border-[#dbeafe] bg-[#eff6ff] p-3">
+              <div class="text-xs font-bold text-[#1e3a8a] uppercase">Fila</div>
+              <div id="expQueueCount" class="text-2xl font-black text-[#1d4ed8]">0</div>
+            </div>
+            <div class="rounded-xl border border-[#fef3c7] bg-[#fffbeb] p-3">
+              <div class="text-xs font-bold text-[#92400e] uppercase">Processados</div>
+              <div id="expProcessedCount" class="text-2xl font-black text-[#b45309]">0</div>
+            </div>
+            <div class="rounded-xl border border-[#dcfce7] bg-[#f0fdf4] p-3">
+              <div class="text-xs font-bold text-[#166534] uppercase">Sucesso</div>
+              <div id="expSuccessCount" class="text-2xl font-black text-[#15803d]">0</div>
+            </div>
+            <div class="rounded-xl border border-[#fee2e2] bg-[#fef2f2] p-3">
+              <div class="text-xs font-bold text-[#991b1b] uppercase">Falhas</div>
+              <div id="expFailCount" class="text-2xl font-black text-[#dc2626]">0</div>
+            </div>
+          </div>
+
+          <div class="mt-3 rounded-xl border border-[#f0ddd6] bg-[#fff8f5] p-3 text-sm space-y-1">
+            <div><strong>Ultimo pacote:</strong> <span id="expLastPackage">-</span></div>
+            <div><strong>Rota nova:</strong> <span id="expLastRoute">-</span></div>
+            <div><strong>AT:</strong> <span id="expLastTask">-</span></div>
+            <div><strong>Rota antiga:</strong> <span id="expLastOldRoute">-</span></div>
+          </div>
+
+          <button id="expResetSessionButton" type="button" class="secondary-btn w-full mt-3">
+            <i class="fa-solid fa-rotate-left mr-2"></i>Resetar Sessao Turbo
+          </button>
+        </div>
+
+        <div class="rounded-2xl border border-[#e5e7eb] bg-white p-4">
+          <div class="section-title mb-3">
+            <i class="fa-solid fa-list-check text-[#0f766e]"></i>Log Rapido
+          </div>
+          <ul id="expLogList" class="max-h-[320px] overflow-y-auto space-y-2 pr-1"></ul>
+        </div>
+      </div>
+    </div>
+  `;
+  mainPanel.insertAdjacentElement('afterend', expeditionPanel);
+
+  const ehaPanel = document.createElement('section');
+  ehaPanel.id = 'ehaPanel';
+  ehaPanel.className = 'panel p-5 md:p-7 mb-5 hidden';
+  ehaPanel.innerHTML = `
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+      <div>
+        <h2 class="text-2xl md:text-3xl font-black text-gray-900">
+          <i class="fa-solid fa-truck-ramp-box mr-2 text-[#b91c1c]"></i>EHA — Pacote Que Não Coube
+        </h2>
+        <p class="text-sm text-gray-600 mt-1">Bipa o código → acha rota ainda aberta na região → aloca na Shopee na hora → etiqueta pronta pra colar em cima da antiga.</p>
+      </div>
+      <div id="ehaSetupBadge" class="text-xs font-bold uppercase tracking-[0.16em] text-[#b91c1c] bg-[#fff5f5] border border-[#fecaca] rounded-full px-3 py-2">
+        verificando configuração…
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-5">
+      <div class="space-y-4">
+        <div class="rounded-2xl border border-[#fecaca] bg-[#fff8f8] p-4">
+          <div class="section-title mb-3">
+            <i class="fa-solid fa-barcode text-[#b91c1c]"></i>Bipar Pacote EHA
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
+            <input id="ehaCodeInput" type="text" class="soft-input uppercase" placeholder="Bipe ou digite o código (BR/SPX TN) e pressione Enter" autocomplete="off">
+            <button id="ehaRunButton" type="button" class="primary-btn md:px-6">
+              <i class="fa-solid fa-play mr-2"></i>Alocar
+            </button>
+          </div>
+          <div class="mt-3 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2">
+            <div id="ehaStatusText" class="text-sm font-bold text-emerald-700">Pronto pra bipar.</div>
+          </div>
+        </div>
+
+        <div id="ehaResultCard" class="rounded-2xl border border-[#e5e7eb] bg-white p-4 hidden">
+          <div class="section-title mb-3">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>Resultado
+          </div>
+          <div id="ehaResultBody" class="text-sm space-y-1"></div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="rounded-2xl border border-[#e5e7eb] bg-white p-4">
+          <div class="section-title mb-3">
+            <i class="fa-solid fa-gauge-high text-[#b91c1c]"></i>Painel EHA
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="rounded-xl border border-[#dcfce7] bg-[#f0fdf4] p-3">
+              <div class="text-xs font-bold text-[#166534] uppercase">Alocados</div>
+              <div id="ehaSuccessCount" class="text-2xl font-black text-[#15803d]">0</div>
+            </div>
+            <div class="rounded-xl border border-[#fee2e2] bg-[#fef2f2] p-3">
+              <div class="text-xs font-bold text-[#991b1b] uppercase">Retidos (sem rota)</div>
+              <div id="ehaFailCount" class="text-2xl font-black text-[#dc2626]">0</div>
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 mt-3">Pacotes retidos ficam registrados na aba <strong>PENDENCIAS_EHA</strong> pra não virar acúmulo invisível. Toda alocação — sucesso ou falha — também fica em <strong>EHA_HISTORICO</strong>.</p>
+        </div>
+
+        <div class="rounded-2xl border border-[#e5e7eb] bg-white p-4">
+          <div class="section-title mb-3">
+            <i class="fa-solid fa-list-check text-[#0f766e]"></i>Log EHA
+          </div>
+          <ul id="ehaLogList" class="max-h-[320px] overflow-y-auto space-y-2 pr-1"></ul>
+        </div>
+      </div>
+    </div>
+  `;
+  expeditionPanel.insertAdjacentElement('afterend', ehaPanel);
+
+  bindExpeditionTabEvents();
+  bindEhaTabEvents();
+  loadExpeditionConfigFromStorage();
+  syncExpeditionConfigFromMain(false);
+  switchOperationTab('main');
+  refreshExpeditionStatsUI();
+  installExpeditionScannerBridge();
+  refreshEhaSetupBadge();
+}
+
+function bindExpeditionTabEvents() {
+  document.getElementById('openMainTabButton').addEventListener('click', () => switchOperationTab('main'));
+  document.getElementById('openExpeditionTabButton').addEventListener('click', () => switchOperationTab('expedition'));
+  document.getElementById('openEhaTabButton').addEventListener('click', () => switchOperationTab('eha'));
+
+  document.getElementById('expStartScannerButton').addEventListener('click', startExpeditionScanner);
+  document.getElementById('expStopScannerButton').addEventListener('click', () => stopExpeditionScanner(false));
+
+  document.getElementById('expCaptureQrButton').addEventListener('click', () => {
+    document.getElementById('expCaptureQrInput').click();
+  });
+  document.getElementById('expCaptureQrInput').addEventListener('change', handleExpeditionPhotoCapture);
+
+  document.getElementById('expManualRunButton').addEventListener('click', processExpeditionManualCode);
+  document.getElementById('expManualCodeInput').addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      processExpeditionManualCode();
+    }
+  });
+
+  document.getElementById('expUseMainConfigButton').addEventListener('click', () => syncExpeditionConfigFromMain(true));
+  document.getElementById('expResetSessionButton').addEventListener('click', resetExpeditionSession);
+
+  document.querySelectorAll('[data-exp-preset]').forEach(button => {
+    button.addEventListener('click', () => {
+      document.getElementById('expPreferredVehicle').value = button.dataset.vehicle || '';
+      document.getElementById('expSearchPreference').value = button.dataset.search || 'ALL';
+      saveExpeditionConfigToStorage();
+      setExpeditionStatus('Preset aplicado com sucesso.');
+    });
+  });
+
+  ['expPreferredVehicle', 'expSearchPreference', 'expAutoPrint', 'expSendToCloud'].forEach(id => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.addEventListener('change', saveExpeditionConfigToStorage);
+  });
+}
+
+function installExpeditionScannerBridge() {
+  if (expeditionState.bridgeInstalled) return;
+  expeditionState.bridgeInstalled = true;
+
+  window.removeEventListener('message', handleScannerPopupMessage);
+
+  window.addEventListener('message', event => {
+    const data = event.data || {};
+
+    if (!expeditionState.scanMode) {
+      handleScannerPopupMessage(event);
+      return;
     }
 
-    // Mesmo formato usado em produção (createLabelHtml no Rota Mista V.3):
-    // rota nova em destaque, corredor/gaiola de destino, AT, data e rota antiga.
-    function criarEtiquetaHtml(et) {
-      return '<div class="etiqueta">'
-        + '  <div class="rota-nova">' + (et.rotaNova || '—') + '</div>'
-        + '  <div class="linha"></div>'
-        + '  <div class="detalhes">'
-        + '    AT: ' + et.at + '<br>'
-        + '    BR: ' + et.br + '<br>'
-        + '    Data: ' + et.data
-        + '  </div>'
-        + '  <div class="rota-antiga">Rota original: ' + (et.rotaAntiga || '—') + '</div>'
-        + '</div>';
+    if (!data || typeof data !== 'object' || !data.type) return;
+
+    if (data.type === 'spx-qr-code') {
+      const cleanCode = sanitizeScannedCode(data.code);
+      const accepted = enqueueExpeditionCode(cleanCode, 'scanner');
+      acknowledgeScannerPopup(cleanCode, accepted);
+
+      if (accepted) {
+        showScanToast(cleanCode, 'info', 'Bipado: entrando na fila turbo');
+      } else {
+        showScanToast(cleanCode, 'info', 'Leitura repetida/fila');
+      }
+      return;
     }
 
-    function imprimirEtiqueta() {
-      if (!estadoAtual || !estadoAtual.etiqueta) return;
-      document.getElementById('printArea').innerHTML = criarEtiquetaHtml(estadoAtual.etiqueta);
-      document.body.classList.add('printing-labels');
-      window.print();
-      setTimeout(function() {
-        document.body.classList.remove('printing-labels');
-        document.getElementById('printArea').innerHTML = '';
-      }, 300);
+    if (data.type === 'spx-scanner-status') {
+      setExpeditionStatus(data.message || 'Scanner turbo ativo.');
+      return;
     }
 
-    function proximoPacote() {
-      limparAreas();
-      var input = document.getElementById('brInput');
-      input.value = '';
-      input.focus();
+    if (data.type === 'spx-scanner-error') {
+      setExpeditionStatus(data.message || 'Falha no scanner turbo.', true);
+      displayMessage(data.message || 'Falha no scanner turbo.', 'error');
+      return;
     }
-  </script>
+
+    if (data.type === 'spx-scanner-closed') {
+      stopExpeditionScanner(true);
+      return;
+    }
+  });
+}
+
+function switchOperationTab(mode) {
+  const mainPanel = document.getElementById('mainOperationPanel');
+  const expeditionPanel = document.getElementById('expeditionPanel');
+  const ehaPanel = document.getElementById('ehaPanel');
+  const mainBtn = document.getElementById('openMainTabButton');
+  const expBtn = document.getElementById('openExpeditionTabButton');
+  const ehaBtn = document.getElementById('openEhaTabButton');
+
+  if (!mainPanel || !expeditionPanel || !ehaPanel || !mainBtn || !expBtn || !ehaBtn) return;
+
+  const isExpedition = mode === 'expedition';
+  const isEha = mode === 'eha';
+  const isMain = !isExpedition && !isEha;
+
+  mainPanel.classList.toggle('hidden', !isMain);
+  expeditionPanel.classList.toggle('hidden', !isExpedition);
+  ehaPanel.classList.toggle('hidden', !isEha);
+
+  mainBtn.className = isMain
+    ? 'rounded-xl border border-[#ee4d2d] bg-[#ee4d2d] px-4 py-3 font-extrabold text-white transition hover:bg-[#d63f23]'
+    : 'rounded-xl border border-[#f0ddd6] bg-white px-4 py-3 font-extrabold text-[#7c2d12] transition hover:bg-[#fff8f5]';
+  expBtn.className = isExpedition
+    ? 'rounded-xl border border-[#1d4ed8] bg-[#1d4ed8] px-4 py-3 font-extrabold text-white transition hover:bg-[#1e40af]'
+    : 'rounded-xl border border-[#d8e8ff] bg-[#f8fbff] px-4 py-3 font-extrabold text-[#1d4ed8] transition hover:bg-[#eef5ff]';
+  ehaBtn.className = isEha
+    ? 'rounded-xl border border-[#b91c1c] bg-[#b91c1c] px-4 py-3 font-extrabold text-white transition hover:bg-[#991b1b]'
+    : 'rounded-xl border border-[#fecaca] bg-[#fff5f5] px-4 py-3 font-extrabold text-[#b91c1c] transition hover:bg-[#fee2e2]';
+
+  if (isEha) {
+    refreshEhaSetupBadge();
+    const input = document.getElementById('ehaCodeInput');
+    if (input) input.focus();
+  }
+}
+
+function getExpeditionConfig() {
+  const preferredVehicle = document.getElementById('expPreferredVehicle');
+  const searchPreference = document.getElementById('expSearchPreference');
+  const autoPrint = document.getElementById('expAutoPrint');
+  const sendToCloud = document.getElementById('expSendToCloud');
+
+  return {
+    preferredVehicle: preferredVehicle ? preferredVehicle.value : '',
+    searchPreference: searchPreference ? searchPreference.value : 'ALL',
+    autoPrint: !!(autoPrint && autoPrint.checked),
+    sendToCloud: !!(sendToCloud && sendToCloud.checked)
+  };
+}
+
+function saveExpeditionConfigToStorage() {
+  try {
+    localStorage.setItem(EXPEDITION_STORAGE_KEY, JSON.stringify(getExpeditionConfig()));
+  } catch (error) {}
+}
+
+function loadExpeditionConfigFromStorage() {
+  try {
+    const raw = localStorage.getItem(EXPEDITION_STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+
+    if (saved.preferredVehicle !== undefined) {
+      document.getElementById('expPreferredVehicle').value = saved.preferredVehicle;
+    }
+    if (saved.searchPreference !== undefined) {
+      document.getElementById('expSearchPreference').value = saved.searchPreference;
+    }
+    if (saved.autoPrint !== undefined) {
+      document.getElementById('expAutoPrint').checked = !!saved.autoPrint;
+    }
+    if (saved.sendToCloud !== undefined) {
+      document.getElementById('expSendToCloud').checked = !!saved.sendToCloud;
+    }
+  } catch (error) {}
+}
+
+function syncExpeditionConfigFromMain(showMessage) {
+  const expVehicle = document.getElementById('expPreferredVehicle');
+  const expSearch = document.getElementById('expSearchPreference');
+  if (!expVehicle || !expSearch) return;
+
+  expVehicle.value = preferredVehicleSelect ? preferredVehicleSelect.value : '';
+  expSearch.value = searchPreferenceSelect ? searchPreferenceSelect.value : 'ALL';
+
+  saveExpeditionConfigToStorage();
+  if (showMessage) {
+    displayMessage('Configuracao copiada da aba principal para o Inicio de Expedicao.', 'success');
+  }
+}
+
+function setExpeditionStatus(text, isError) {
+  const status = document.getElementById('expStatusText');
+  if (!status) return;
+  status.textContent = text || '';
+  status.className = isError ? 'text-sm font-bold text-red-600' : 'text-sm font-bold text-emerald-700';
+}
+
+function refreshExpeditionStatsUI() {
+  const queueSize = expeditionState.queue.length + (expeditionState.processing ? 1 : 0);
+
+  const queueEl = document.getElementById('expQueueCount');
+  const processedEl = document.getElementById('expProcessedCount');
+  const successEl = document.getElementById('expSuccessCount');
+  const failEl = document.getElementById('expFailCount');
+
+  if (queueEl) queueEl.textContent = String(queueSize);
+  if (processedEl) processedEl.textContent = String(expeditionState.stats.processed);
+  if (successEl) successEl.textContent = String(expeditionState.stats.success);
+  if (failEl) failEl.textContent = String(expeditionState.stats.fail);
+}
+
+function updateExpeditionLastResult(data) {
+  const safe = data || {};
+  document.getElementById('expLastPackage').textContent = safe.code || '-';
+  document.getElementById('expLastRoute').textContent = safe.printRoute || (safe.suggestion && safe.suggestion.route) || '-';
+  document.getElementById('expLastTask').textContent = safe.taskId || (safe.suggestion && safe.suggestion.taskId) || '-';
+  document.getElementById('expLastOldRoute').textContent = safe.printOldRoute || (safe.original && safe.original.route) || '-';
+}
+
+function appendExpeditionLog(type, title, details) {
+  const logList = document.getElementById('expLogList');
+  if (!logList) return;
+
+  const colorClass = type === 'success'
+    ? 'border-green-200 bg-green-50'
+    : type === 'error'
+      ? 'border-red-200 bg-red-50'
+      : 'border-blue-200 bg-blue-50';
+
+  const now = new Date().toLocaleTimeString('pt-BR');
+
+  const li = document.createElement('li');
+  li.className = `rounded-xl border ${colorClass} p-3`;
+  li.innerHTML = `
+    <div class="text-xs font-black text-gray-600 mb-1">${now}</div>
+    <div class="text-sm font-black text-gray-900">${escapeHtml(title || '')}</div>
+    <div class="text-xs text-gray-700 mt-1">${escapeHtml(details || '')}</div>
+  `;
+
+  logList.prepend(li);
+
+  while (logList.children.length > expeditionState.recentLimit) {
+    logList.removeChild(logList.lastChild);
+  }
+}
+
+// ====================================================================
+// EHA — pacote que nao coube: bipou -> achou rota aberta -> chamou a
+// API da Shopee NA HORA (nao fica em fila pra rodar depois) -> etiqueta.
+// ====================================================================
+
+const ehaState = { successCount: 0, failCount: 0, processing: false };
+
+function bindEhaTabEvents() {
+  const runButton = document.getElementById('ehaRunButton');
+  const input = document.getElementById('ehaCodeInput');
+  if (!runButton || !input) return;
+
+  runButton.addEventListener('click', runEha);
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      runEha();
+    }
+  });
+}
+
+function refreshEhaSetupBadge() {
+  const badge = document.getElementById('ehaSetupBadge');
+  if (!badge) return;
+
+  badge.textContent = 'verificando configuração…';
+  badge.className = 'text-xs font-bold uppercase tracking-[0.16em] text-[#b91c1c] bg-[#fff5f5] border border-[#fecaca] rounded-full px-3 py-2';
+
+  google.script.run
+    .withSuccessHandler(status => {
+      if (status && status.cookieOk && status.station) {
+        badge.textContent = 'pronto — station ' + status.station;
+        badge.className = 'text-xs font-bold uppercase tracking-[0.16em] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-2';
+      } else {
+        const faltando = [];
+        if (!status || !status.cookieOk) faltando.push('cookies');
+        if (!status || !status.station) faltando.push('station id');
+        badge.textContent = 'faltando: ' + faltando.join(' + ') + ' (menu "⚡ Ações SPX")';
+        badge.className = 'text-xs font-bold uppercase tracking-[0.16em] text-[#b91c1c] bg-[#fff5f5] border border-[#fecaca] rounded-full px-3 py-2';
+      }
+    })
+    .withFailureHandler(() => {
+      badge.textContent = 'não foi possível checar a configuração';
+    })
+    .getEhaSetupStatus();
+}
+
+function setEhaStatus(text, isError) {
+  const status = document.getElementById('ehaStatusText');
+  if (!status) return;
+  status.textContent = text || '';
+  status.className = isError ? 'text-sm font-bold text-red-600' : 'text-sm font-bold text-emerald-700';
+}
+
+function updateEhaStatsUI() {
+  const successEl = document.getElementById('ehaSuccessCount');
+  const failEl = document.getElementById('ehaFailCount');
+  if (successEl) successEl.textContent = String(ehaState.successCount);
+  if (failEl) failEl.textContent = String(ehaState.failCount);
+}
+
+function appendEhaLog(type, title, details) {
+  const logList = document.getElementById('ehaLogList');
+  if (!logList) return;
+
+  const colorClass = type === 'success'
+    ? 'border-green-200 bg-green-50'
+    : type === 'error'
+      ? 'border-red-200 bg-red-50'
+      : 'border-blue-200 bg-blue-50';
+
+  const now = new Date().toLocaleTimeString('pt-BR');
+  const li = document.createElement('li');
+  li.className = `rounded-xl border ${colorClass} p-3`;
+  li.innerHTML = `
+    <div class="text-xs font-black text-gray-600 mb-1">${now}</div>
+    <div class="text-sm font-black text-gray-900">${escapeHtml(title || '')}</div>
+    <div class="text-xs text-gray-700 mt-1">${escapeHtml(details || '')}</div>
+  `;
+
+  logList.prepend(li);
+  while (logList.children.length > 30) logList.removeChild(logList.lastChild);
+}
+
+function renderEhaResult(response) {
+  const card = document.getElementById('ehaResultCard');
+  const body = document.getElementById('ehaResultBody');
+  if (!card || !body) return;
+
+  card.classList.remove('hidden');
+
+  if (response && response.success) {
+    const mesa = response.mesa ? ` · MESA ${escapeHtml(response.mesa)}` : '';
+    body.innerHTML = `
+      <div class="text-emerald-700 font-black"><i class="fa-solid fa-circle-check mr-1"></i>Alocado com sucesso na Shopee</div>
+      <div><strong>Rota nova:</strong> ${escapeHtml(response.printRoute || '-')}${mesa}</div>
+      <div><strong>AT:</strong> ${escapeHtml(response.taskId || '-')}</div>
+      <div><strong>Rota antiga:</strong> ${escapeHtml(response.printOldRoute || '-')}</div>
+      <div><strong>Critério:</strong> ${escapeHtml(response.criterion || '-')}</div>
+    `;
+  } else {
+    const reason = (response && response.error) || 'Falha desconhecida.';
+    body.innerHTML = `
+      <div class="text-red-600 font-black"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Não alocado</div>
+      <div>${escapeHtml(reason)}</div>
+      ${response && response.noSuggestion ? '<div class="text-xs text-gray-500 mt-1">Pacote fica retido — registrado em PENDENCIAS_EHA.</div>' : ''}
+    `;
+  }
+}
+
+function runEha() {
+  if (ehaState.processing) return;
+
+  const input = document.getElementById('ehaCodeInput');
+  const runButton = document.getElementById('ehaRunButton');
+  const code = sanitizeScannedCode(input ? input.value : '');
+  if (!code) {
+    setEhaStatus('Bipe ou digite um código válido.', true);
+    return;
+  }
+
+  ehaState.processing = true;
+  if (runButton) { runButton.disabled = true; runButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Alocando...'; }
+  setEhaStatus('Buscando rota e alocando ' + code + '...');
+
+  google.script.run
+    .withSuccessHandler(response => {
+      ehaState.processing = false;
+      if (runButton) { runButton.disabled = false; runButton.innerHTML = '<i class="fa-solid fa-play mr-2"></i>Alocar'; }
+
+      renderEhaResult(response);
+
+      if (response && response.success) {
+        ehaState.successCount++;
+        const route = response.printRoute || '-';
+        appendEhaLog('success', `${code} -> ${route}`, `AT ${response.taskId || '-'} confirmada na Shopee`);
+        setEhaStatus(`Sucesso: ${code} alocado em ${route}.`);
+        printInternal(createLabelHtml(code, route, response.taskId, (response.printOldRoute || '-') + ' — EHA (não coube)'));
+      } else {
+        ehaState.failCount++;
+        const reason = (response && response.error) || 'Falha no processamento.';
+        appendEhaLog('error', `${code} não alocado`, reason);
+        setEhaStatus(`Falha: ${reason}`, true);
+      }
+
+      updateEhaStatsUI();
+      if (input) { input.value = ''; input.focus(); }
+    })
+    .withFailureHandler(error => {
+      ehaState.processing = false;
+      ehaState.failCount++;
+      if (runButton) { runButton.disabled = false; runButton.innerHTML = '<i class="fa-solid fa-play mr-2"></i>Alocar'; }
+
+      const msg = (error && error.message) || 'Erro de comunicação com o Apps Script.';
+      appendEhaLog('error', `${code} erro de comunicação`, msg);
+      setEhaStatus(msg, true);
+      updateEhaStatsUI();
+      if (input) input.focus();
+    })
+    .processarEha(code);
+}
+
+async function startExpeditionScanner() {
+  if (expeditionState.scanMode && scannerActive) return;
+
+  if (scannerActive && !expeditionState.scanMode) {
+    stopQrScanner();
+  }
+
+  expeditionState.scanMode = true;
+  updateExpeditionScannerButtons(true);
+  setExpeditionStatus('Abrindo scanner turbo...');
+
+  await startQrScanner();
+
+  if (!scannerActive) {
+    expeditionState.scanMode = false;
+    updateExpeditionScannerButtons(false);
+    setExpeditionStatus('Nao foi possivel abrir o scanner.', true);
+    return;
+  }
+
+  setExpeditionStatus('Scanner ativo. Bipou -> sugeriu -> salvou na AT.');
+}
+
+function stopExpeditionScanner(fromPopup) {
+  expeditionState.scanMode = false;
+
+  if (scannerActive) {
+    stopQrScanner();
+  }
+
+  updateExpeditionScannerButtons(false);
+  setExpeditionStatus(fromPopup ? 'Scanner fechado na janela de leitura.' : 'Scanner turbo encerrado.');
+}
+
+function updateExpeditionScannerButtons(running) {
+  const startBtn = document.getElementById('expStartScannerButton');
+  const stopBtn = document.getElementById('expStopScannerButton');
+  if (!startBtn || !stopBtn) return;
+
+  startBtn.classList.toggle('hidden', !!running);
+  stopBtn.classList.toggle('hidden', !running);
+}
+
+function enqueueExpeditionCode(rawCode, source) {
+  const code = sanitizeScannedCode(rawCode);
+  if (!code) return false;
+
+  const now = Date.now();
+  if (code === expeditionState.lastReadCode && now - expeditionState.lastReadAt < 1400) {
+    setExpeditionStatus('Leitura repetida ignorada: ' + code);
+    return false;
+  }
+
+  if (expeditionState.currentCode === code || expeditionState.queue.indexOf(code) !== -1) {
+    setExpeditionStatus('Codigo ja esta em processamento/fila: ' + code);
+    return false;
+  }
+
+  expeditionState.lastReadCode = code;
+  expeditionState.lastReadAt = now;
+  expeditionState.queue.push(code);
+
+  appendExpeditionLog('info', 'Codigo em fila', `${code} (${source || 'manual'})`);
+  refreshExpeditionStatsUI();
+  processExpeditionQueue();
+
+  return true;
+}
+
+function processExpeditionQueue() {
+  if (expeditionState.processing || expeditionState.queue.length === 0) return;
+
+  const config = getExpeditionConfig();
+  const code = expeditionState.queue.shift();
+
+  expeditionState.processing = true;
+  expeditionState.currentCode = code;
+  refreshExpeditionStatsUI();
+
+  setExpeditionStatus('Processando automaticamente: ' + code);
+
+  google.script.run
+    .withSuccessHandler(response => {
+      expeditionState.processing = false;
+      expeditionState.currentCode = '';
+      expeditionState.stats.processed++;
+
+      if (response && response.success) {
+        expeditionState.stats.success++;
+        updateExpeditionLastResult(response);
+
+        const route = response.printRoute || (response.suggestion && response.suggestion.route) || 'N/A';
+        const taskId = response.taskId || (response.suggestion && response.suggestion.taskId) || 'N/A';
+
+        appendExpeditionLog('success', `${code} -> ${route}`, `AT ${taskId} salva automaticamente`);
+        showScanToast(code, 'success', `AT salva + rota ${route}`);
+
+        if (config.autoPrint) {
+          const oldRoute = response.printOldRoute || (response.original && response.original.route) || '';
+          printInternal(createLabelHtml(code, route, taskId, oldRoute));
+        }
+
+        if (config.sendToCloud) {
+          pushCodesToCloud([code], false);
+        }
+
+        setExpeditionStatus(`Sucesso: ${code} alocado em ${route}.`);
+      } else {
+        expeditionState.stats.fail++;
+        if (response && response.noSuggestion) expeditionState.stats.noSuggestion++;
+
+        const reason = response && response.error ? response.error : 'Falha no processamento automatico';
+        const oldRoute = response && response.original && response.original.route ? response.original.route : 'N/A';
+
+        updateExpeditionLastResult({
+          code: code,
+          printRoute: '-',
+          taskId: '-',
+          printOldRoute: oldRoute
+        });
+
+        appendExpeditionLog('error', `${code} sem alocacao automatica`, reason);
+        showScanToast(code, 'error', 'Sem alocacao automatica');
+        setExpeditionStatus(`Falha: ${reason}`, true);
+      }
+
+      refreshExpeditionStatsUI();
+      processExpeditionQueue();
+    })
+    .withFailureHandler(error => {
+      expeditionState.processing = false;
+      expeditionState.currentCode = '';
+      expeditionState.stats.processed++;
+      expeditionState.stats.fail++;
+
+      appendExpeditionLog('error', `${code} erro de comunicacao`, error.message || 'Erro desconhecido');
+      showScanToast(code, 'error', 'Erro ao consultar planilha');
+      setExpeditionStatus('Erro de comunicacao com Apps Script.', true);
+
+      refreshExpeditionStatsUI();
+      processExpeditionQueue();
+    })
+    .processExpeditionPackage(code, config.preferredVehicle, config.searchPreference);
+}
+
+function processExpeditionManualCode() {
+  const input = document.getElementById('expManualCodeInput');
+  if (!input) return;
+
+  const code = sanitizeScannedCode(input.value);
+  if (!code) {
+    setExpeditionStatus('Digite um codigo valido para processar.', true);
+    return;
+  }
+
+  const accepted = enqueueExpeditionCode(code, 'manual');
+  if (accepted) {
+    showScanToast(code, 'info', 'Codigo manual em fila turbo');
+    input.value = '';
+  }
+}
+
+function handleExpeditionPhotoCapture(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  decodeQrFromFile(
+    file,
+    code => {
+      const accepted = enqueueExpeditionCode(code, 'foto');
+      if (accepted) {
+        showScanToast(code, 'info', 'Foto lida: codigo em fila turbo');
+      } else {
+        showScanToast(code, 'info', 'Codigo repetido/fila');
+      }
+    },
+    () => {
+      displayMessage('Nao consegui identificar QR Code na foto da expedicao.', 'error');
+    }
+  );
+
+  event.target.value = '';
+}
+
+function decodeQrFromFile(file, onSuccess, onError) {
+  const reader = new FileReader();
+  const image = new Image();
+
+  reader.onload = loadEvent => {
+    image.onload = () => {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      canvas.width = image.width;
+      canvas.height = image.height;
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const result = window.jsQR
+        ? window.jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'attemptBoth' })
+        : null;
+
+      if (result && result.data) {
+        const code = sanitizeScannedCode(result.data);
+        if (code) {
+          onSuccess(code);
+          return;
+        }
+      }
+
+      if (onError) onError();
+    };
+
+    image.onerror = () => {
+      if (onError) onError();
+    };
+
+    image.src = loadEvent.target.result;
+  };
+
+  reader.onerror = () => {
+    if (onError) onError();
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function resetExpeditionSession() {
+  expeditionState.queue = [];
+  expeditionState.processing = false;
+  expeditionState.currentCode = '';
+  expeditionState.lastReadCode = '';
+  expeditionState.lastReadAt = 0;
+  expeditionState.stats = { processed: 0, success: 0, fail: 0, noSuggestion: 0 };
+
+  const logList = document.getElementById('expLogList');
+  if (logList) logList.innerHTML = '';
+
+  updateExpeditionLastResult({ code: '-', printRoute: '-', taskId: '-', printOldRoute: '-' });
+  refreshExpeditionStatsUI();
+  setExpeditionStatus('Sessao turbo resetada com sucesso.');
+}
+</script>
 </body>
 </html>
