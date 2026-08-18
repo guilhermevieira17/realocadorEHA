@@ -31,14 +31,16 @@
     }
 
     label { font-size: 12px; color: var(--cinza); display:block; margin-bottom: 4px; }
-    select, input[type=text] {
+    select, input[type=text], textarea {
       width: 100%;
       font-size: 16px;
       padding: 10px;
       border: 1px solid #d8dbe0;
       border-radius: 8px;
       margin-bottom: 10px;
+      font-family: inherit;
     }
+    textarea { resize: vertical; min-height: 70px; }
     input#brInput { font-size: 22px; text-align:center; letter-spacing: 1px; }
 
     button {
@@ -55,9 +57,11 @@
     button.secundario { background: #fff; color: var(--azul); border: 1px solid var(--azul); }
 
     .status-linha { display:flex; align-items:center; gap:8px; font-size: 13px; margin-bottom: 10px; }
-    .bolinha { width:8px; height:8px; border-radius:50%; background: var(--cinza); }
+    .bolinha { width:8px; height:8px; border-radius:50%; background: var(--cinza); flex-shrink: 0; }
     .bolinha.ok { background: var(--verde); }
     .bolinha.erro { background: #d64545; }
+    .status-linha .trocar { margin-left: auto; color: var(--azul); font-size: 12px; text-decoration: none; white-space: nowrap; }
+    #cookieForm button { margin-bottom: 0; }
 
     .sugestao {
       border: 1px solid #e3e5e9;
@@ -85,20 +89,50 @@
     .mensagem-erro { background:#fdeceb; color:#a3271b; border-radius:8px; padding:10px; font-size: 13px; margin-bottom: 10px; }
     .mensagem-info { background:#eef1f5; color:#333; border-radius:8px; padding:10px; font-size: 13px; margin-bottom: 10px; }
 
-    #etiqueta {
-      border: 2px dashed #999;
-      padding: 14px;
-      font-family: monospace;
-      font-size: 13px;
+    /* Mesmo formato 7cm x 4cm já usado em produção no Rota Mista V.3
+       (createLabelHtml / .etiqueta) — mantém consistência visual com
+       o que os operadores já reconhecem, colado por cima da etiqueta antiga. */
+    .etiqueta {
+      width: 7cm;
+      height: 4cm;
+      padding: 5px 10px;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+      border: 1px dashed #ccc;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      background-color: white;
       margin-top: 10px;
+      color: #000;
     }
-    #etiqueta .grande { font-size: 26px; font-weight: 700; }
+    .etiqueta .linha { border-top: 2px solid #000; margin: 2px 0; }
+    .etiqueta .rota-nova {
+      font-size: 34px;
+      font-weight: 900;
+      text-align: center;
+      margin: 0;
+      color: #000;
+      line-height: 1.1;
+      flex-shrink: 0;
+    }
+    .etiqueta .detalhes { font-size: 11px; text-align: left; padding: 0 2px; line-height: 1.2; color: #000; }
+    .etiqueta .rota-antiga { font-size: 9px; text-align: center; margin-top: 2px; color: #000; flex-shrink: 0; }
+    #printArea { display: none; }
     .oculto { display:none; }
 
     @media print {
-      body * { visibility: hidden; }
-      #etiqueta, #etiqueta * { visibility: visible; }
-      #etiqueta { position: absolute; top:0; left:0; border: none; }
+      @page { size: 7cm 4cm; margin: 0; }
+      body.printing-labels {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: none !important;
+      }
+      body.printing-labels > *:not(#printArea) { display: none !important; }
+      body.printing-labels #printArea { display: block !important; }
+      .etiqueta { border: none !important; margin: 0 !important; }
     }
   </style>
 </head>
@@ -113,6 +147,13 @@
     <div class="status-linha">
       <div id="cookieBolinha" class="bolinha"></div>
       <span id="cookieTexto">verificando cookie do hub…</span>
+      <a href="#" class="trocar" id="trocarCookieLink" onclick="mostrarCookieForm(); return false;">trocar cookie</a>
+    </div>
+
+    <div id="cookieForm" class="oculto">
+      <label for="cookieInput">Cole todos os cookies do navegador logado no FMS Portal deste hub</label>
+      <textarea id="cookieInput" placeholder="csrftoken=...; fms_user_skey=...; SPC_T_ID=...; ..."></textarea>
+      <button id="salvarCookieBtn" onclick="salvarCookie()">Salvar cookie</button>
     </div>
 
     <label for="brInput">BR do pacote (SPX TN)</label>
@@ -122,6 +163,8 @@
 
   <div id="areaSugestoes" class="oculto"></div>
   <div id="areaResultado" class="oculto"></div>
+
+  <div id="printArea"></div>
 
   <script>
     var HUBS_CACHE = [];
@@ -153,8 +196,42 @@
       texto.textContent = 'verificando cookie do hub…';
       google.script.run.withSuccessHandler(function(r) {
         bolinha.className = 'bolinha ' + (r.ok ? 'ok' : 'erro');
-        texto.textContent = r.ok ? ('cookie OK — ' + r.hub) : ('sem cookie configurado para ' + r.hub + ' — use o menu "⚡ Realocador EHA" na planilha');
+        texto.textContent = r.ok ? ('cookie OK — ' + r.hub) : ('sem cookie configurado para ' + r.hub);
+        if (r.ok) { esconderCookieForm(); } else { mostrarCookieForm(); }
       }).statusCookieHub(stationAtual());
+    }
+
+    function mostrarCookieForm() {
+      document.getElementById('cookieForm').classList.remove('oculto');
+    }
+
+    function esconderCookieForm() {
+      document.getElementById('cookieForm').classList.add('oculto');
+      document.getElementById('cookieInput').value = '';
+    }
+
+    function salvarCookie() {
+      var texto = document.getElementById('cookieInput').value.trim();
+      if (!texto) return;
+      var btn = document.getElementById('salvarCookieBtn');
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+      google.script.run
+        .withSuccessHandler(function(r) {
+          btn.disabled = false;
+          btn.textContent = 'Salvar cookie';
+          if (r.ok) {
+            atualizarStatusCookie();
+          } else {
+            alert('Faltando: ' + ((r.faltando && r.faltando.join(', ')) || r.error || 'cookie incompleto'));
+          }
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.textContent = 'Salvar cookie';
+          alert('Erro ao salvar cookie: ' + (err.message || err));
+        })
+        .salvarCookieHub(stationAtual(), texto);
     }
 
     function limparAreas() {
@@ -235,20 +312,43 @@
       }
 
       var et = res.etiqueta;
+      estadoAtual = estadoAtual || {};
+      estadoAtual.etiqueta = et;
+
       area.innerHTML = '<div class="card resultado">'
         + '<div class="ok-icone">✅</div>'
         + '<h2>Alocado em ' + res.atDestino + '</h2>'
         + '<div class="sub">Corredor/Gaiola ' + res.cageDestino + (res.mesa ? ' · MESA ' + res.mesa : '') + ' · ' + res.cluster + '</div>'
-        + '<div id="etiqueta">'
-        + '  <div>CORREDOR/GAIOLA</div><div class="grande">' + et.corredorGaiola + '</div>'
-        + '  <div style="margin-top:8px">AT: ' + et.at + '</div>'
-        + '  <div>HUB: ' + et.hub + '</div>'
-        + '  <div>DATA: ' + et.data + ' ' + et.hora + '</div>'
-        + '  <div>BR: ' + et.br + '</div>'
-        + '</div>'
-        + '<button onclick="window.print()">🖨️ Imprimir etiqueta</button>'
+        + criarEtiquetaHtml(et)
+        + '<button onclick="imprimirEtiqueta()">🖨️ Imprimir etiqueta</button>'
         + '<button class="secundario" onclick="proximoPacote()">Próximo pacote</button>'
         + '</div>';
+    }
+
+    // Mesmo formato usado em produção (createLabelHtml no Rota Mista V.3):
+    // rota nova em destaque, corredor/gaiola de destino, AT, data e rota antiga.
+    function criarEtiquetaHtml(et) {
+      return '<div class="etiqueta">'
+        + '  <div class="rota-nova">' + (et.rotaNova || '—') + '</div>'
+        + '  <div class="linha"></div>'
+        + '  <div class="detalhes">'
+        + '    AT: ' + et.at + '<br>'
+        + '    BR: ' + et.br + '<br>'
+        + '    Data: ' + et.data
+        + '  </div>'
+        + '  <div class="rota-antiga">Rota original: ' + (et.rotaAntiga || '—') + '</div>'
+        + '</div>';
+    }
+
+    function imprimirEtiqueta() {
+      if (!estadoAtual || !estadoAtual.etiqueta) return;
+      document.getElementById('printArea').innerHTML = criarEtiquetaHtml(estadoAtual.etiqueta);
+      document.body.classList.add('printing-labels');
+      window.print();
+      setTimeout(function() {
+        document.body.classList.remove('printing-labels');
+        document.getElementById('printArea').innerHTML = '';
+      }, 300);
     }
 
     function proximoPacote() {
