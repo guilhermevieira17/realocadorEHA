@@ -351,12 +351,12 @@
       </div>
       <div class="md:flex md:items-end md:justify-between gap-4">
         <div>
-          <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">Rota Mista V.3 ,MEGA HUB LPR - 16</h1>
-          <p class="text-white/90 text-sm md:text-base max-w-2xl">Leitura em lote, sugestões automáticas e nuvem compartilhada entre celular e computador.</p>
+          <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">EHA — MEGA HUB LPR - 16</h1>
+          <p class="text-white/90 text-sm md:text-base max-w-2xl">Pacote que não coube na rota: bipa → acha rota aberta na região → aloca na Shopee na hora → etiqueta pronta.</p>
         </div>
         <div class="mt-4 md:mt-0 rounded-2xl bg-white/12 border border-white/20 px-4 py-3">
           <div class="text-xs uppercase tracking-[0.22em] text-white/75 font-bold">Operação</div>
-          <div class="text-lg font-extrabold">Realocador de Pacotes</div>
+          <div class="text-lg font-extrabold">Realocador EHA</div>
           <button id="openUsageGuideButton" type="button" class="mt-3 w-full rounded-xl bg-white text-[#c93d20] px-4 py-3 text-sm font-extrabold hover:bg-[#fff7f3] transition">
             <i class="fa-solid fa-book-medical mr-2"></i>Como utilizar
           </button>
@@ -2758,7 +2758,13 @@ function initExpeditionTabFeature() {
   bindEhaTabEvents();
   loadExpeditionConfigFromStorage();
   syncExpeditionConfigFromMain(false);
-  switchOperationTab('main');
+
+  // Por enquanto o app trabalha só com o EHA -- esconde o seletor de abas
+  // (Painel Completo / Turbo continuam no código, prontos pra voltar depois,
+  // é só remover a linha abaixo que esconde a barra).
+  tabBar.classList.add('hidden');
+  switchOperationTab('eha');
+
   refreshExpeditionStatsUI();
   installExpeditionScannerBridge();
   refreshEhaSetupBadge();
